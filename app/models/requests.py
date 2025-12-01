@@ -16,6 +16,10 @@ class SingleRoundProbabilityRequest(BaseModel):
     golfer: GolferProfile
     course: CourseSetup
     target: ScoringTarget
+    holes_played: Literal[9, 18] = Field(
+        default=18,
+        description="Number of holes played (9 or 18)"
+    )
 
 
 class SingleRoundProbabilityResponse(BaseModel):
@@ -62,6 +66,10 @@ class MultiRoundProbabilityRequest(BaseModel):
         default=1, 
         description="Minimum number of rounds to achieve target score",
         ge=1
+    )
+    holes_played: Literal[9, 18] = Field(
+        default=18,
+        description="Number of holes played per round (9 or 18)"
     )
 
 
@@ -136,6 +144,10 @@ class MilestoneProbabilityRequest(BaseModel):
     golfer: GolferProfile
     course: CourseSetup
     event: EventStructure
+    holes_played: Literal[9, 18] = Field(
+        default=18,
+        description="Number of holes played per round (9 or 18)"
+    )
 
 
 class MilestoneProbabilityResponse(BaseModel):
@@ -352,4 +364,273 @@ class ConsecutiveScoresProbabilityResponse(BaseModel):
         description="Probability of achieving at least one streak within total matches",
         ge=0.0,
         le=1.0
+    )
+
+
+# ============================================================================
+# Completed Round Score Analysis Models
+# ============================================================================
+
+class CompletedRoundScore(BaseModel):
+    """Model for a single completed round score."""
+    round_number: int = Field(
+        ...,
+        description="Round number in the tournament/day",
+        ge=1
+    )
+    gross_score: int = Field(
+        ...,
+        description="Actual gross score shot",
+        ge=25,
+        le=200
+    )
+    holes_played: Literal[9, 18] = Field(
+        default=18,
+        description="Number of holes played (9 or 18)"
+    )
+    round_date: Optional[str] = Field(
+        None,
+        description="Date of the round (YYYY-MM-DD format)"
+    )
+    notes: Optional[str] = Field(
+        None,
+        description="Optional notes about the round"
+    )
+
+
+class CompletedRoundAnalysisRequest(BaseModel):
+    """Request model for analyzing completed round scores."""
+    golfer: GolferProfile
+    course: CourseSetup
+    completed_scores: list[CompletedRoundScore] = Field(
+        ...,
+        description="List of completed round scores to analyze",
+        min_length=1
+    )
+
+
+class RoundProbabilityAnalysis(BaseModel):
+    """Probability analysis for a single completed round."""
+    round_number: int = Field(
+        ...,
+        description="Round number"
+    )
+    actual_score: int = Field(
+        ...,
+        description="Actual score shot"
+    )
+    holes_played: int = Field(
+        ...,
+        description="Number of holes played (9 or 18)"
+    )
+    expected_score: float = Field(
+        ...,
+        description="Expected score based on handicap"
+    )
+    strokes_from_expected: float = Field(
+        ...,
+        description="Difference from expected (negative = better than expected)"
+    )
+    z_score: float = Field(
+        ...,
+        description="Z-score for this performance"
+    )
+    probability_at_or_below: float = Field(
+        ...,
+        description="Probability of shooting this score or better",
+        ge=0.0,
+        le=1.0
+    )
+    percentile: float = Field(
+        ...,
+        description="Percentile ranking of this round (0-100)",
+        ge=0.0,
+        le=100.0
+    )
+    performance_descriptor: str = Field(
+        ...,
+        description="Human-readable description of performance level"
+    )
+
+
+class CompletedRoundAnalysisResponse(BaseModel):
+    """Response model for completed round score analysis."""
+    golfer_name: str = Field(
+        ...,
+        description="Name of the golfer"
+    )
+    handicap_index: float = Field(
+        ...,
+        description="Golfer's handicap index"
+    )
+    course_name: str = Field(
+        ...,
+        description="Course name"
+    )
+    expected_score_per_round: float = Field(
+        ...,
+        description="Expected score for a single round"
+    )
+    score_std: float = Field(
+        ...,
+        description="Standard deviation of scoring"
+    )
+    num_rounds_analyzed: int = Field(
+        ...,
+        description="Number of rounds analyzed"
+    )
+    round_analyses: list[RoundProbabilityAnalysis] = Field(
+        ...,
+        description="Individual round probability analyses"
+    )
+    average_actual_score: float = Field(
+        ...,
+        description="Average of all actual scores"
+    )
+    total_strokes_from_expected: float = Field(
+        ...,
+        description="Total strokes above/below expected (negative = better)"
+    )
+    overall_probability: float = Field(
+        ...,
+        description="Joint probability of achieving all these scores or better",
+        ge=0.0,
+        le=1.0
+    )
+    overall_performance_descriptor: str = Field(
+        ...,
+        description="Overall performance assessment"
+    )
+    best_round: RoundProbabilityAnalysis = Field(
+        ...,
+        description="Best round from the set"
+    )
+    worst_round: RoundProbabilityAnalysis = Field(
+        ...,
+        description="Worst round from the set"
+    )
+
+
+# ============================================================================
+# Sandbagging Detection Models
+# ============================================================================
+
+class SandbaggerRedFlag(BaseModel):
+    """Individual red flag indicator for potential sandbagging."""
+    flag_type: str = Field(
+        ...,
+        description="Type of red flag (e.g., 'TOURNAMENT_PERFORMANCE', 'SCORE_VOLATILITY')"
+    )
+    severity: Literal["LOW", "MEDIUM", "HIGH", "CRITICAL"] = Field(
+        ...,
+        description="Severity level of the red flag"
+    )
+    description: str = Field(
+        ...,
+        description="Human-readable description of the issue"
+    )
+    evidence: str = Field(
+        ...,
+        description="Specific evidence supporting this flag"
+    )
+    probability_note: Optional[str] = Field(
+        None,
+        description="Statistical probability context if applicable"
+    )
+
+
+class SandbaggerAnalysisRequest(BaseModel):
+    """Request model for sandbagging analysis."""
+    golfer: GolferProfile
+    course: CourseSetup
+    tournament_scores: list[CompletedRoundScore] = Field(
+        ...,
+        description="Scores from competitive/tournament rounds",
+        min_length=1
+    )
+    casual_scores: Optional[list[CompletedRoundScore]] = Field(
+        None,
+        description="Optional: Scores from casual rounds for comparison"
+    )
+
+
+class SandbaggerAnalysisResponse(BaseModel):
+    """Response model for sandbagging analysis."""
+    golfer_name: str = Field(
+        ...,
+        description="Name of the golfer being analyzed"
+    )
+    handicap_index: float = Field(
+        ...,
+        description="Current handicap index"
+    )
+    
+    # Risk Assessment
+    sandbagging_risk_score: float = Field(
+        ...,
+        description="Overall risk score (0-100, higher = more suspicious)",
+        ge=0.0,
+        le=100.0
+    )
+    risk_level: Literal["LOW", "MODERATE", "HIGH", "SEVERE"] = Field(
+        ...,
+        description="Overall risk level classification"
+    )
+    
+    # Tournament Performance Analysis
+    tournament_avg_score: float = Field(
+        ...,
+        description="Average score in tournament rounds"
+    )
+    tournament_avg_vs_expected: float = Field(
+        ...,
+        description="Average strokes better/worse than expected in tournaments"
+    )
+    tournament_performance_percentile: float = Field(
+        ...,
+        description="Average percentile of tournament performances (0-100)"
+    )
+    
+    # Consistency Analysis
+    score_volatility: float = Field(
+        ...,
+        description="Standard deviation of tournament scores"
+    )
+    volatility_vs_expected: str = Field(
+        ...,
+        description="Comparison of actual volatility to expected (NORMAL, LOW, HIGH)"
+    )
+    
+    # Pattern Detection
+    red_flags: list[SandbaggerRedFlag] = Field(
+        ...,
+        description="List of suspicious patterns detected"
+    )
+    
+    # Comparative Analysis (if casual scores provided)
+    has_casual_comparison: bool = Field(
+        default=False,
+        description="Whether casual round comparison was performed"
+    )
+    casual_vs_tournament_diff: Optional[float] = Field(
+        None,
+        description="Average score difference (casual - tournament)"
+    )
+    
+    # Statistical Evidence
+    probability_all_tournament_scores: float = Field(
+        ...,
+        description="Joint probability of all tournament scores",
+        ge=0.0,
+        le=1.0
+    )
+    
+    # Summary and Recommendations
+    summary: str = Field(
+        ...,
+        description="Overall assessment summary"
+    )
+    recommendation: str = Field(
+        ...,
+        description="Recommended action or conclusion"
     )

@@ -479,3 +479,124 @@ def compute_consecutive_in_n_matches_probability(
                     pass
     
     return 1.0 - f[n]
+
+
+def analyze_completed_round(
+    actual_score: int,
+    expected_score: float,
+    score_std: float
+) -> tuple[float, float, float, str]:
+    """
+    Analyze a completed round score and calculate probability metrics.
+    
+    Args:
+        actual_score: The actual score shot
+        expected_score: The expected score based on handicap
+        score_std: Standard deviation of scoring
+    
+    Returns:
+        Tuple of (z_score, probability_at_or_below, percentile, performance_descriptor)
+    """
+    # Calculate z-score
+    strokes_from_expected = actual_score - expected_score
+    z_score = strokes_from_expected / score_std
+    
+    # Calculate probability of shooting this score or better (at or below)
+    # Using continuity correction for discrete distribution
+    probability_at_or_below = stats.norm.cdf(actual_score + 0.5, expected_score, score_std)
+    
+    # Percentile (lower is better in golf)
+    percentile = probability_at_or_below * 100
+    
+    # Performance descriptor based on z-score
+    if z_score <= -3.0:
+        descriptor = "Extraordinary (once in ~370 rounds)"
+    elif z_score <= -2.5:
+        descriptor = "Exceptional (once in ~164 rounds)"
+    elif z_score <= -2.0:
+        descriptor = "Outstanding (once in ~44 rounds)"
+    elif z_score <= -1.5:
+        descriptor = "Excellent (once in ~15 rounds)"
+    elif z_score <= -1.0:
+        descriptor = "Very Good (once in ~6 rounds)"
+    elif z_score <= -0.5:
+        descriptor = "Above Average"
+    elif z_score <= 0.5:
+        descriptor = "Average (Expected Performance)"
+    elif z_score <= 1.0:
+        descriptor = "Below Average"
+    elif z_score <= 1.5:
+        descriptor = "Poor (bottom ~15%)"
+    elif z_score <= 2.0:
+        descriptor = "Very Poor (bottom ~2%)"
+    else:
+        descriptor = "Extremely Poor (bottom ~2.5%)"
+    
+    return z_score, probability_at_or_below, percentile, descriptor
+
+
+def compute_joint_probability_independent_rounds(
+    individual_probabilities: list[float]
+) -> float:
+    """
+    Compute the joint probability of achieving multiple independent results.
+    
+    For independent rounds, the probability of achieving all results is the
+    product of individual probabilities.
+    
+    Args:
+        individual_probabilities: List of individual round probabilities
+    
+    Returns:
+        Joint probability of all rounds occurring
+    """
+    joint_prob = 1.0
+    for prob in individual_probabilities:
+        joint_prob *= prob
+    
+    return joint_prob
+
+
+def get_overall_performance_descriptor(
+    average_z_score: float,
+    num_rounds: int
+) -> str:
+    """
+    Get an overall performance descriptor for multiple rounds.
+    
+    Args:
+        average_z_score: Average z-score across all rounds
+        num_rounds: Number of rounds analyzed
+    
+    Returns:
+        Human-readable overall performance description
+    """
+    if num_rounds == 1:
+        if average_z_score <= -2.0:
+            return "Single outstanding round - truly exceptional performance!"
+        elif average_z_score <= -1.0:
+            return "Single excellent round - well above expectations!"
+        elif average_z_score <= 0.0:
+            return "Single good round - better than expected!"
+        elif average_z_score <= 1.0:
+            return "Single average round - close to expectations."
+        else:
+            return "Single challenging round - below expectations."
+    else:
+        if average_z_score <= -2.0:
+            return f"Outstanding {num_rounds}-round performance - exceptionally rare consistency!"
+        elif average_z_score <= -1.5:
+            return f"Excellent {num_rounds}-round performance - remarkably consistent!"
+        elif average_z_score <= -1.0:
+            return f"Very strong {num_rounds}-round performance - well above average!"
+        elif average_z_score <= -0.5:
+            return f"Good {num_rounds}-round performance - above expectations!"
+        elif average_z_score <= 0.5:
+            return f"Solid {num_rounds}-round performance - right around expectations."
+        elif average_z_score <= 1.0:
+            return f"Fair {num_rounds}-round performance - slightly below expectations."
+        elif average_z_score <= 1.5:
+            return f"Challenging {num_rounds}-round performance - below expectations."
+        else:
+            return f"Difficult {num_rounds}-round stretch - well below typical performance."
+

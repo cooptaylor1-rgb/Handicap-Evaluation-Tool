@@ -13,12 +13,26 @@ from .probability import (
     estimate_nine_hole_score_std,
     compute_consecutive_scores_probability,
     compute_consecutive_in_n_matches_probability,
+    analyze_completed_round,
+    compute_joint_probability_independent_rounds,
+    get_overall_performance_descriptor,
 )
 
 from .team_probability import (
     compute_player_parameters,
     simulate_team_bestball_round_scores,
     get_team_approximation_notes,
+)
+
+from .sandbagging import (
+    calculate_sandbagging_risk_score,
+    detect_tournament_excellence_pattern,
+    detect_low_volatility_pattern,
+    detect_improbable_performance,
+    detect_casual_vs_tournament_disparity,
+    detect_all_scores_better_than_expected,
+    generate_sandbagging_summary,
+    generate_recommendation,
 )
 
 __all__ = [
@@ -35,8 +49,21 @@ __all__ = [
     "estimate_nine_hole_score_std",
     "compute_consecutive_scores_probability",
     "compute_consecutive_in_n_matches_probability",
+    "analyze_completed_round",
+    "compute_joint_probability_independent_rounds",
+    "get_overall_performance_descriptor",
     # Team probability functions
     "compute_player_parameters",
     "simulate_team_bestball_round_scores",
     "get_team_approximation_notes",
+    # Sandbagging detection functions
+    "calculate_sandbagging_risk_score",
+    "detect_tournament_excellence_pattern",
+    "detect_low_volatility_pattern",
+    "detect_improbable_performance",
+    "detect_casual_vs_tournament_disparity",
+    "detect_all_scores_better_than_expected",
+    "generate_sandbagging_summary",
+    "generate_recommendation",
 ]
+

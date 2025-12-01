@@ -41,13 +41,8 @@ class Settings:
     # API settings
     API_PREFIX: str = "/api/golf"
     
-    # CORS settings (for development)
-    CORS_ORIGINS: list[str] = [
-        "http://localhost:3000",
-        "http://localhost:8000",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:8000",
-    ]
+    # CORS settings (for development and mobile access)
+    CORS_ORIGINS: list[str] = ["*"]  # Allow all origins for mobile access
 
 
 settings = Settings()

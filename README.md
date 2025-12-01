@@ -85,6 +85,21 @@ uvicorn app.main:app --reload
    - **API Docs**: http://localhost:8000/docs
    - **ReDoc**: http://localhost:8000/redoc
 
+### 📱 Mobile/iPhone Access
+
+To use on your iPhone or mobile device:
+
+```bash
+./start_iphone.sh
+```
+
+Then on your iPhone:
+1. Connect to the same Wi-Fi network
+2. Open Safari and go to the displayed URL (e.g., `http://192.168.1.100:8000`)
+3. Optional: Add to Home Screen for app-like experience
+
+See [MOBILE_SETUP.md](MOBILE_SETUP.md) for detailed mobile instructions.
+
 ## API Endpoints
 
 ### Individual Player
