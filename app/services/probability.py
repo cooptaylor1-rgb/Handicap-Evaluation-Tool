@@ -319,8 +319,9 @@ def get_standard_milestones(expected_score: float) -> list[int]:
         relevant_milestones.append(expected_rounded)
     
     # Add one ambitious target (3 sigma below expected)
-    # and one conservative target if not already present
-    ambitious = int(round(expected_score - 3 * 3.5))  # Using typical sigma
+    # Use a conservative typical sigma for milestone calculation
+    typical_sigma = 3.5  # Conservative middle value from estimate_score_std range
+    ambitious = int(round(expected_score - 3 * typical_sigma))
     if ambitious not in relevant_milestones and ambitious >= 60:
         relevant_milestones.append(ambitious)
     

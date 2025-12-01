@@ -44,7 +44,11 @@ class SingleRoundProbabilityResponse(BaseModel):
     )
     z_score: Optional[float] = Field(
         None, 
-        description="Z-score used in normal distribution calculation"
+        description=(
+            "Z-score used in normal distribution calculation. "
+            "Negative values indicate target is above expected score (harder to achieve), "
+            "positive values indicate target is below expected score (easier to achieve)."
+        )
     )
 
 
