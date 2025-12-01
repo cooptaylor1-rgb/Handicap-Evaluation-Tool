@@ -13,16 +13,18 @@ For production:
 """
 
 import logging
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
 from app.config import settings
 from app.routes import golf_router, team_router
+from app.middleware import SimpleCacheMiddleware
 
 # Configure logging
 logging.basicConfig(
@@ -62,6 +64,36 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Add simple cache middleware (5 minute TTL for GET requests)
+app.add_middleware(SimpleCacheMiddleware, ttl_seconds=300)
+
+
+# Add performance monitoring middleware
+@app.middleware("http")
+async def add_performance_metrics(request: Request, call_next):
+    """Log request duration and add performance headers."""
+    start_time = time.time()
+    
+    response = await call_next(request)
+    
+    process_time = time.time() - start_time
+    response.headers["X-Process-Time"] = str(round(process_time * 1000, 2))  # milliseconds
+    
+    # Log slow requests (> 500ms)
+    if process_time > 0.5:
+        logger.warning(
+            f"Slow request: {request.method} {request.url.path} "
+            f"completed in {process_time*1000:.2f}ms"
+        )
+    else:
+        logger.debug(
+            f"{request.method} {request.url.path} "
+            f"completed in {process_time*1000:.2f}ms"
+        )
+    
+    return response
+
 
 # Include API routers
 app.include_router(golf_router, prefix=settings.API_PREFIX, tags=["Individual Golf"])

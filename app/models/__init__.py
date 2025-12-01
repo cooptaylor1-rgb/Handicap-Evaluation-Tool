@@ -16,6 +16,13 @@ from .requests import (
     TeamBestBallMultiRoundResponse,
     ConsecutiveScoresProbabilityRequest,
     ConsecutiveScoresProbabilityResponse,
+    CompletedRoundScore,
+    CompletedRoundAnalysisRequest,
+    RoundProbabilityAnalysis,
+    CompletedRoundAnalysisResponse,
+    SandbaggerRedFlag,
+    SandbaggerAnalysisRequest,
+    SandbaggerAnalysisResponse,
 )
 
 __all__ = [
@@ -43,4 +50,12 @@ __all__ = [
     "TeamBestBallMultiRoundResponse",
     "ConsecutiveScoresProbabilityRequest",
     "ConsecutiveScoresProbabilityResponse",
+    "CompletedRoundScore",
+    "CompletedRoundAnalysisRequest",
+    "RoundProbabilityAnalysis",
+    "CompletedRoundAnalysisResponse",
+    "SandbaggerRedFlag",
+    "SandbaggerAnalysisRequest",
+    "SandbaggerAnalysisResponse",
 ]
+

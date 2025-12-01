@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#2e7d32">
     <title>Golf Scoring Probability Calculator</title>
     <style>
         :root {
@@ -67,6 +70,7 @@
         .tab {
             flex: 1;
             padding: 15px 20px;
+            min-height: 48px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -75,6 +79,7 @@
             font-size: 1rem;
             font-weight: 500;
             color: var(--text-secondary);
+            -webkit-tap-highlight-color: transparent;
         }
 
         .tab:hover {
@@ -131,10 +136,14 @@
         .form-group input,
         .form-group select {
             padding: 12px 15px;
+            min-height: 44px; /* iOS minimum comfortable touch target */
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            font-size: 1rem;
+            font-size: 16px; /* Prevents iOS zoom on focus */
             transition: border-color 0.3s ease;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
         }
 
         .form-group input:focus,
@@ -159,6 +168,9 @@
         .btn-primary {
             background: var(--primary-color);
             color: white;
+            min-height: 48px; /* Better touch target */
+            -webkit-appearance: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .btn-primary:hover {
@@ -172,6 +184,46 @@
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: var(--text-secondary);
+            color: white;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #616161;
+            transform: translateY(-1px);
+        }
+
+        .score-entry {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .badge {
+            background: var(--primary-color);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
         }
 
         .results-section {
@@ -338,15 +390,38 @@
 
         @media (max-width: 768px) {
             .tabs {
-                flex-direction: column;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .tab {
+                white-space: nowrap;
+                min-width: 150px;
             }
             
             header h1 {
                 font-size: 1.5rem;
             }
             
+            header p {
+                font-size: 0.9rem;
+            }
+            
             .form-grid {
                 grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            .form-section {
+                padding: 15px;
+            }
+            
+            .result-card {
+                padding: 15px;
             }
         }
     </style>
@@ -362,6 +437,8 @@
             <button class="tab active" onclick="showTab('individual')">Individual Player</button>
             <button class="tab" onclick="showTab('team')">Team / Member-Guest</button>
             <button class="tab" onclick="showTab('consecutive')">Consecutive Scores</button>
+            <button class="tab" onclick="showTab('completed')">Score Analysis</button>
+            <button class="tab" onclick="showTab('sandbagging')">Sandbagging Detection</button>
         </div>
 
         <!-- Individual Player Tab -->
@@ -376,7 +453,14 @@
                         </div>
                         <div class="form-group">
                             <label for="target-score">Target Score</label>
-                            <input type="number" id="target-score" value="85" min="50" max="150" required>
+                            <input type="number" id="target-score" value="85" min="25" max="150" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="individual-holes-played">Holes Played</label>
+                            <select id="individual-holes-played" required>
+                                <option value="18" selected>18 Holes</option>
+                                <option value="9">9 Holes</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -411,13 +495,20 @@
                     <h3>🏆 Event Structure</h3>
                     <div class="form-grid">
                         <div class="form-group">
+                            <label for="individual-holes-played">Holes Per Round</label>
+                            <select id="individual-holes-played" required>
+                                <option value="18" selected>18 Holes</option>
+                                <option value="9">9 Holes</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label for="num-rounds">Number of Rounds</label>
                             <input type="number" id="num-rounds" value="3" min="1" max="10" required>
                         </div>
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Calculate Probabilities</button>
+                <button type="submit" class="btn btn-primary" id="individual-submit-btn">Calculate Probabilities</button>
             </form>
 
             <div class="loading" id="individual-loading">
@@ -757,6 +848,322 @@
         </div>
     </div>
 
+    <!-- Completed Rounds Analysis Tab -->
+    <div id="completed-tab" class="tab-content">
+        <form id="completed-form">
+            <div class="form-section">
+                <h3>👤 Golfer Information</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="comp-name">Golfer Name</label>
+                        <input type="text" id="comp-name" value="John Smith" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="comp-handicap">Handicap Index</label>
+                        <input type="number" id="comp-handicap" step="0.1" value="15.0" min="-10" max="54" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>⛳ Course Information</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="comp-course-name">Course Name</label>
+                        <input type="text" id="comp-course-name" value="My Local Course" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="comp-tee-name">Tee</label>
+                        <input type="text" id="comp-tee-name" value="White" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="comp-par">Par</label>
+                        <input type="number" id="comp-par" value="72" min="27" max="80" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="comp-course-rating">Course Rating</label>
+                        <input type="number" id="comp-course-rating" step="0.1" value="72.5" min="50" max="90" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="comp-slope-rating">Slope Rating</label>
+                        <input type="number" id="comp-slope-rating" value="130" min="55" max="155" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>📊 Completed Round Scores</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 15px;">
+                    Enter your actual gross scores from completed rounds. Add as many rounds as you'd like to analyze.
+                </p>
+                <div id="scores-container">
+                    <div class="score-entry" data-round="1">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Round 1 Score</label>
+                                <input type="number" class="score-input" min="25" max="200" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Holes Played</label>
+                                <select class="holes-input" required>
+                                    <option value="18" selected>18 Holes</option>
+                                    <option value="9">9 Holes</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Date (Optional)</label>
+                                <input type="date" class="date-input">
+                            </div>
+                            <div class="form-group">
+                                <label>Notes (Optional)</label>
+                                <input type="text" class="notes-input" placeholder="e.g., Windy day">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" onclick="addScoreEntry()" class="btn btn-secondary" style="margin-top: 10px; background: var(--text-secondary);">
+                    + Add Another Round
+                </button>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">
+                Analyze My Scores
+            </button>
+        </form>
+
+        <div class="loading-indicator" id="completed-loading">
+            <div class="spinner"></div>
+            <p>Analyzing completed rounds...</p>
+        </div>
+
+        <div id="completed-results" class="results-section" style="display: none;">
+            <h3>📈 Score Analysis Results</h3>
+
+            <div class="result-card">
+                <div class="result-header">
+                    <h4 id="comp-golfer-display">--</h4>
+                    <span class="badge" id="comp-rounds-badge">-- rounds</span>
+                </div>
+                
+                <div class="result-details">
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="label">Expected Score</div>
+                            <div class="value" id="comp-expected">--</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Average Actual Score</div>
+                            <div class="value" id="comp-average">--</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Total From Expected</div>
+                            <div class="value" id="comp-total-diff">--</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Overall Probability</div>
+                            <div class="value prob-high" id="comp-overall-prob">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-text" id="completed-overall-summary" style="margin-top: 15px; padding: 15px; background: #f0f7f0; border-radius: 8px;">
+                </div>
+            </div>
+
+            <div class="result-card">
+                <h4>Individual Round Analysis</h4>
+                <div id="rounds-analysis-container">
+                    <!-- Individual round cards will be inserted here -->
+                </div>
+            </div>
+
+            <div class="result-card">
+                <h4>Performance Highlights</h4>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <div class="label">Best Round</div>
+                        <div class="value" style="color: var(--success);" id="comp-best-score">--</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="label">Best Probability</div>
+                        <div class="value" id="comp-best-prob">--</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="label">Worst Round</div>
+                        <div class="value" style="color: var(--error);" id="comp-worst-score">--</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="label">Worst Probability</div>
+                        <div class="value" id="comp-worst-prob">--</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="error-message" id="completed-error" style="display: none;"></div>
+    </div>
+
+    <!-- Sandbagging Detection Tab -->
+    <div id="sandbagging-tab" class="tab-content">
+        <form id="sandbagging-form">
+            <div class="form-section">
+                <h3>🎯 Golfer Under Investigation</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="sand-name">Golfer Name</label>
+                        <input type="text" id="sand-name" value="Suspected Player" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sand-handicap">Stated Handicap Index</label>
+                        <input type="number" id="sand-handicap" step="0.1" value="15.0" min="-10" max="54" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>⛳ Course Information</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="sand-course-name">Course Name</label>
+                        <input type="text" id="sand-course-name" value="Tournament Course" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sand-tee-name">Tee</label>
+                        <input type="text" id="sand-tee-name" value="White" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sand-par">Par</label>
+                        <input type="number" id="sand-par" value="72" min="27" max="80" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sand-course-rating">Course Rating</label>
+                        <input type="number" id="sand-course-rating" step="0.1" value="72.5" min="50" max="90" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sand-slope-rating">Slope Rating</label>
+                        <input type="number" id="sand-slope-rating" value="130" min="55" max="155" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>🏆 Tournament/Competitive Scores</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 15px;">
+                    Enter scores from competitive rounds (tournaments, matches, member-guest, etc.). These are analyzed for suspicious patterns.
+                </p>
+                <div id="tournament-scores-container">
+                    <div class="score-entry" data-round="1">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Tournament Round 1</label>
+                                <input type="number" class="tournament-score-input" min="25" max="200" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Holes</label>
+                                <select class="tournament-holes-input" required>
+                                    <option value="18" selected>18</option>
+                                    <option value="9">9</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" onclick="addTournamentScore()" class="btn btn-secondary" style="margin-top: 10px;">
+                    + Add Tournament Round
+                </button>
+            </div>
+
+            <div class="form-section">
+                <h3>⛳ Casual Scores (Optional)</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 15px;">
+                    Optional: Enter casual round scores to compare performance. Sandbaggers often play worse in casual rounds to inflate their handicap.
+                </p>
+                <div id="casual-scores-container">
+                    <!-- Casual scores added dynamically -->
+                </div>
+                <button type="button" onclick="addCasualScore()" class="btn btn-secondary" style="margin-top: 10px;">
+                    + Add Casual Round
+                </button>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px; font-size: 1.1rem;">
+                🔍 Analyze for Sandbagging
+            </button>
+        </form>
+
+        <div class="loading-indicator" id="sandbagging-loading">
+            <div class="spinner"></div>
+            <p>Analyzing scoring patterns...</p>
+        </div>
+
+        <div id="sandbagging-results" class="results-section" style="display: none;">
+            <h3>🚨 Sandbagging Analysis Results</h3>
+
+            <!-- Risk Assessment Card -->
+            <div class="result-card" id="risk-card" style="border-width: 3px;">
+                <div class="result-header">
+                    <h4 id="sand-golfer-name">--</h4>
+                    <span class="badge" id="risk-badge" style="font-size: 1rem; padding: 8px 16px;">RISK: --</span>
+                </div>
+                
+                <div style="text-align: center; margin: 20px 0;">
+                    <div style="font-size: 3rem; font-weight: bold; margin-bottom: 10px;" id="risk-score-display">--</div>
+                    <div style="font-size: 1.2rem; color: var(--text-secondary);">Sandbagging Risk Score (0-100)</div>
+                </div>
+
+                <div class="summary-text" id="sand-summary" style="margin: 20px 0; padding: 20px; border-radius: 8px; font-size: 1.05rem;">
+                </div>
+
+                <div style="padding: 15px; background: #f0f4f8; border-radius: 8px; border-left: 4px solid var(--primary-color);">
+                    <strong>📋 Recommendation:</strong>
+                    <p id="sand-recommendation" style="margin-top: 10px;"></p>
+                </div>
+            </div>
+
+            <!-- Statistics Card -->
+            <div class="result-card">
+                <h4>📊 Tournament Performance Statistics</h4>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <div class="label">Avg Tournament Score</div>
+                        <div class="value" id="sand-avg-score">--</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="label">Avg vs Expected</div>
+                        <div class="value" id="sand-avg-vs-expected">--</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="label">Performance Percentile</div>
+                        <div class="value" id="sand-percentile">--</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="label">Score Volatility</div>
+                        <div class="value" id="sand-volatility">--</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="label">Joint Probability</div>
+                        <div class="value" id="sand-joint-prob">--</div>
+                    </div>
+                    <div class="detail-item" id="casual-comparison" style="display: none;">
+                        <div class="label">Casual vs Tournament Diff</div>
+                        <div class="value" id="sand-casual-diff">--</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Red Flags Card -->
+            <div class="result-card" id="red-flags-card">
+                <h4>🚩 Red Flags Detected (<span id="red-flags-count">0</span>)</h4>
+                <div id="red-flags-container">
+                    <p style="color: var(--text-secondary); font-style: italic;">No red flags detected</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="error-message" id="sandbagging-error" style="display: none;"></div>
+    </div>
+</div>
+
     <footer>
         <p>Golf Scoring Probability Engine v1.0.0 | <a href="/docs" target="_blank">API Documentation</a></p>
     </footer>
@@ -768,7 +1175,10 @@
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             
-            const tabIndex = tabName === 'individual' ? 1 : (tabName === 'team' ? 2 : 3);
+            const tabIndex = tabName === 'individual' ? 1 : 
+                            (tabName === 'team' ? 2 : 
+                            (tabName === 'consecutive' ? 3 : 
+                            (tabName === 'completed' ? 4 : 5)));
             document.querySelector(`.tab:nth-child(${tabIndex})`).classList.add('active');
             document.getElementById(`${tabName}-tab`).classList.add('active');
         }
@@ -780,6 +1190,58 @@
         function getProbClass(prob) {
             return prob >= 0.2 ? 'prob-high' : 'prob-low';
         }
+
+        // LocalStorage functions for form persistence
+        function saveFormData(formName, data) {
+            try {
+                localStorage.setItem(`golf_${formName}`, JSON.stringify(data));
+            } catch (e) {
+                console.warn('Could not save form data to localStorage:', e);
+            }
+        }
+
+        function loadFormData(formName) {
+            try {
+                const data = localStorage.getItem(`golf_${formName}`);
+                return data ? JSON.parse(data) : null;
+            } catch (e) {
+                console.warn('Could not load form data from localStorage:', e);
+                return null;
+            }
+        }
+
+        function setFormLoading(formId, isLoading) {
+            const form = document.getElementById(formId);
+            const inputs = form.querySelectorAll('input, select, button');
+            inputs.forEach(input => {
+                input.disabled = isLoading;
+            });
+        }
+
+        // Load saved form data on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const individualData = loadFormData('individual');
+            if (individualData) {
+                if (individualData.handicap) document.getElementById('handicap').value = individualData.handicap;
+                if (individualData.targetScore) document.getElementById('target-score').value = individualData.targetScore;
+                if (individualData.courseName) document.getElementById('course-name').value = individualData.courseName;
+                if (individualData.teeName) document.getElementById('tee-name').value = individualData.teeName;
+                if (individualData.par) document.getElementById('par').value = individualData.par;
+                if (individualData.courseRating) document.getElementById('course-rating').value = individualData.courseRating;
+                if (individualData.slopeRating) document.getElementById('slope-rating').value = individualData.slopeRating;
+                if (individualData.numRounds) document.getElementById('num-rounds').value = individualData.numRounds;
+                if (individualData.holesPlayed) document.getElementById('individual-holes-played').value = individualData.holesPlayed;
+            }
+
+            const consecutiveData = loadFormData('consecutive');
+            if (consecutiveData) {
+                if (consecutiveData.handicap) document.getElementById('cons-handicap').value = consecutiveData.handicap;
+                if (consecutiveData.targetScore) document.getElementById('cons-target-score').value = consecutiveData.targetScore;
+                if (consecutiveData.holesPerRound) document.getElementById('holes-per-round').value = consecutiveData.holesPerRound;
+                if (consecutiveData.consecutiveCount) document.getElementById('consecutive-count').value = consecutiveData.consecutiveCount;
+                if (consecutiveData.totalMatches) document.getElementById('total-matches').value = consecutiveData.totalMatches;
+            }
+        });
 
         // Individual Player Form
         document.getElementById('individual-form').addEventListener('submit', async (e) => {
@@ -807,6 +1269,30 @@
             
             const targetScore = parseInt(document.getElementById('target-score').value);
             const numRounds = parseInt(document.getElementById('num-rounds').value);
+            const holesPlayed = parseInt(document.getElementById('individual-holes-played').value);
+
+            // Save form data
+            saveFormData('individual', {
+                handicap: golfer.handicap_index,
+                targetScore: targetScore,
+                courseName: course.course_name,
+                teeName: course.tee_name,
+                par: course.par,
+                courseRating: course.course_rating,
+                slopeRating: course.slope_rating,
+                numRounds: numRounds,
+                holesPlayed: holesPlayed
+            });
+
+            // Validate inputs
+            if (holesPlayed === 9 && targetScore < 25) {
+                error.textContent = 'Target score for 9-hole rounds must be at least 25';
+                error.style.display = 'block';
+                loading.classList.remove('active');
+                return;
+            }
+
+            setFormLoading('individual-form', true);
 
             try {
                 // Single round probability
@@ -816,7 +1302,8 @@
                     body: JSON.stringify({
                         golfer: golfer,
                         course: course,
-                        target: { target_score: targetScore }
+                        target: { target_score: targetScore },
+                        holes_played: holesPlayed
                     })
                 });
                 
@@ -831,7 +1318,8 @@
                         golfer: golfer,
                         course: course,
                         target: { target_score: targetScore },
-                        event: { num_rounds: numRounds }
+                        event: { num_rounds: numRounds },
+                        holes_played: holesPlayed
                     })
                 });
                 
@@ -845,7 +1333,8 @@
                     body: JSON.stringify({
                         golfer: golfer,
                         course: course,
-                        event: { num_rounds: numRounds }
+                        event: { num_rounds: numRounds },
+                        holes_played: holesPlayed
                     })
                 });
                 
@@ -877,9 +1366,11 @@
                 });
 
                 loading.classList.remove('active');
+                setFormLoading('individual-form', false);
                 results.style.display = 'block';
             } catch (err) {
                 loading.classList.remove('active');
+                setFormLoading('individual-form', false);
                 error.textContent = err.message;
                 error.style.display = 'block';
             }
@@ -959,9 +1450,11 @@
                 `;
 
                 loading.classList.remove('active');
+                setFormLoading('team-form', false);
                 results.style.display = 'block';
             } catch (err) {
                 loading.classList.remove('active');
+                setFormLoading('team-form', false);
                 error.textContent = err.message;
                 error.style.display = 'block';
             }
@@ -996,6 +1489,25 @@
             const consecutiveCount = parseInt(document.getElementById('consecutive-count').value);
             const totalMatches = document.getElementById('total-matches').value ? 
                 parseInt(document.getElementById('total-matches').value) : null;
+
+            // Save form data
+            saveFormData('consecutive', {
+                handicap: golfer.handicap_index,
+                targetScore: targetScore,
+                holesPerRound: holesPerRound,
+                consecutiveCount: consecutiveCount,
+                totalMatches: totalMatches
+            });
+
+            // Validate inputs
+            if (holesPerRound === 9 && targetScore < 25) {
+                error.textContent = 'Target score for 9-hole rounds must be at least 25';
+                error.style.display = 'block';
+                loading.classList.remove('active');
+                return;
+            }
+
+            setFormLoading('consecutive-form', true);
 
             try {
                 const requestBody = {
@@ -1054,6 +1566,404 @@
                 }
                 
                 document.getElementById('consecutive-summary').innerHTML = summaryText;
+
+                loading.classList.remove('active');
+                setFormLoading('consecutive-form', false);
+                results.style.display = 'block';
+            } catch (err) {
+                loading.classList.remove('active');
+                setFormLoading('consecutive-form', false);
+                error.textContent = err.message;
+                error.style.display = 'block';
+            }
+        });
+
+        // Helper function to add score entry
+        let scoreEntryCount = 1;
+        function addScoreEntry() {
+            scoreEntryCount++;
+            const container = document.getElementById('scores-container');
+            const newEntry = document.createElement('div');
+            newEntry.className = 'score-entry';
+            newEntry.setAttribute('data-round', scoreEntryCount);
+            newEntry.innerHTML = `
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Round ${scoreEntryCount} Score</label>
+                        <input type="number" class="score-input" min="25" max="200" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Holes Played</label>
+                        <select class="holes-input" required>
+                            <option value="18" selected>18 Holes</option>
+                            <option value="9">9 Holes</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Date (Optional)</label>
+                        <input type="date" class="date-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Notes (Optional)</label>
+                        <input type="text" class="notes-input" placeholder="e.g., Windy day">
+                    </div>
+                </div>
+            `;
+            container.appendChild(newEntry);
+        }
+
+        // Completed Rounds Analysis Form
+        document.getElementById('completed-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const loading = document.getElementById('completed-loading');
+            const results = document.getElementById('completed-results');
+            const error = document.getElementById('completed-error');
+            
+            loading.classList.add('active');
+            results.style.display = 'none';
+            error.style.display = 'none';
+
+            const golfer = {
+                name: document.getElementById('comp-name').value,
+                handicap_index: parseFloat(document.getElementById('comp-handicap').value)
+            };
+            
+            const course = {
+                course_name: document.getElementById('comp-course-name').value,
+                tee_name: document.getElementById('comp-tee-name').value,
+                par: parseInt(document.getElementById('comp-par').value),
+                course_rating: parseFloat(document.getElementById('comp-course-rating').value),
+                slope_rating: parseInt(document.getElementById('comp-slope-rating').value)
+            };
+
+            // Collect all score entries
+            const scoreEntries = document.querySelectorAll('.score-entry');
+            const completedScores = [];
+            scoreEntries.forEach((entry, index) => {
+                const score = parseInt(entry.querySelector('.score-input').value);
+                const holes = parseInt(entry.querySelector('.holes-input').value);
+                const date = entry.querySelector('.date-input').value || null;
+                const notes = entry.querySelector('.notes-input').value || null;
+                
+                completedScores.push({
+                    round_number: index + 1,
+                    gross_score: score,
+                    holes_played: holes,
+                    round_date: date,
+                    notes: notes
+                });
+            });
+
+            try {
+                const response = await fetch(`${API_BASE}/analyze/completed-rounds`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        golfer: golfer,
+                        course: course,
+                        completed_scores: completedScores
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Failed to analyze completed rounds');
+                const data = await response.json();
+
+                // Update summary section
+                document.getElementById('comp-golfer-display').textContent = 
+                    `${data.golfer_name} (${data.handicap_index} HCP) @ ${data.course_name}`;
+                document.getElementById('comp-rounds-badge').textContent = 
+                    `${data.num_rounds_analyzed} round${data.num_rounds_analyzed > 1 ? 's' : ''}`;
+                document.getElementById('comp-expected').textContent = data.expected_score_per_round.toFixed(1);
+                document.getElementById('comp-average').textContent = data.average_actual_score.toFixed(1);
+                
+                const diffColor = data.total_strokes_from_expected < 0 ? 'var(--success)' : 'var(--error)';
+                const diffSign = data.total_strokes_from_expected > 0 ? '+' : '';
+                document.getElementById('comp-total-diff').innerHTML = 
+                    `<span style="color: ${diffColor}; font-weight: bold;">${diffSign}${data.total_strokes_from_expected.toFixed(1)}</span>`;
+                
+                document.getElementById('comp-overall-prob').textContent = formatPercent(data.overall_probability);
+                document.getElementById('completed-overall-summary').innerHTML = 
+                    `<strong>${data.overall_performance_descriptor}</strong>`;
+
+                // Individual rounds analysis
+                const roundsContainer = document.getElementById('rounds-analysis-container');
+                roundsContainer.innerHTML = '';
+                
+                data.round_analyses.forEach(round => {
+                    const diffSign = round.strokes_from_expected > 0 ? '+' : '';
+                    const diffColor = round.strokes_from_expected < 0 ? 'var(--success)' : 
+                                     (round.strokes_from_expected > 0 ? 'var(--error)' : 'var(--text-primary)');
+                    
+                    const roundCard = document.createElement('div');
+                    roundCard.style.cssText = 'border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; margin-bottom: 15px; background: #fafafa;';
+                    roundCard.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h5 style="margin: 0;">Round ${round.round_number} <span style="font-size: 0.85rem; color: var(--text-secondary);">(${round.holes_played} holes)</span></h5>
+                            <span style="font-size: 1.5rem; font-weight: bold;">${round.actual_score}</span>
+                        </div>
+                        <div class="detail-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+                            <div class="detail-item">
+                                <div class="label">Expected</div>
+                                <div class="value">${round.expected_score.toFixed(1)}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="label">From Expected</div>
+                                <div class="value" style="color: ${diffColor}; font-weight: bold;">${diffSign}${round.strokes_from_expected.toFixed(1)}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="label">Probability</div>
+                                <div class="value">${formatPercent(round.probability_at_or_below)}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="label">Percentile</div>
+                                <div class="value">${round.percentile.toFixed(1)}%</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 6px; font-style: italic; color: var(--text-secondary);">
+                            ${round.performance_descriptor}
+                        </div>
+                    `;
+                    roundsContainer.appendChild(roundCard);
+                });
+
+                // Performance highlights
+                document.getElementById('comp-best-score').textContent = data.best_round.actual_score;
+                document.getElementById('comp-best-prob').textContent = 
+                    `${formatPercent(data.best_round.probability_at_or_below)} (Round ${data.best_round.round_number})`;
+                document.getElementById('comp-worst-score').textContent = data.worst_round.actual_score;
+                document.getElementById('comp-worst-prob').textContent = 
+                    `${formatPercent(data.worst_round.probability_at_or_below)} (Round ${data.worst_round.round_number})`;
+
+                loading.classList.remove('active');
+                results.style.display = 'block';
+            } catch (err) {
+                loading.classList.remove('active');
+                error.textContent = err.message;
+                error.style.display = 'block';
+            }
+        });
+
+        // Sandbagging Detection Helper Functions
+        let tournamentScoreCount = 1;
+        let casualScoreCount = 0;
+        
+        function addTournamentScore() {
+            tournamentScoreCount++;
+            const container = document.getElementById('tournament-scores-container');
+            const newEntry = document.createElement('div');
+            newEntry.className = 'score-entry';
+            newEntry.innerHTML = `
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Tournament Round ${tournamentScoreCount}</label>
+                        <input type="number" class="tournament-score-input" min="25" max="200" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Holes</label>
+                        <select class="tournament-holes-input" required>
+                            <option value="18" selected>18</option>
+                            <option value="9">9</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            container.appendChild(newEntry);
+        }
+
+        function addCasualScore() {
+            casualScoreCount++;
+            const container = document.getElementById('casual-scores-container');
+            const newEntry = document.createElement('div');
+            newEntry.className = 'score-entry';
+            newEntry.innerHTML = `
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Casual Round ${casualScoreCount}</label>
+                        <input type="number" class="casual-score-input" min="25" max="200" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Holes</label>
+                        <select class="casual-holes-input" required>
+                            <option value="18" selected>18</option>
+                            <option value="9">9</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            container.appendChild(newEntry);
+        }
+
+        // Sandbagging Analysis Form
+        document.getElementById('sandbagging-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const loading = document.getElementById('sandbagging-loading');
+            const results = document.getElementById('sandbagging-results');
+            const error = document.getElementById('sandbagging-error');
+            
+            loading.classList.add('active');
+            results.style.display = 'none';
+            error.style.display = 'none';
+
+            const golfer = {
+                name: document.getElementById('sand-name').value,
+                handicap_index: parseFloat(document.getElementById('sand-handicap').value)
+            };
+            
+            const course = {
+                course_name: document.getElementById('sand-course-name').value,
+                tee_name: document.getElementById('sand-tee-name').value,
+                par: parseInt(document.getElementById('sand-par').value),
+                course_rating: parseFloat(document.getElementById('sand-course-rating').value),
+                slope_rating: parseInt(document.getElementById('sand-slope-rating').value)
+            };
+
+            // Collect tournament scores
+            const tournamentScores = [];
+            document.querySelectorAll('#tournament-scores-container .score-entry').forEach((entry, index) => {
+                const score = parseInt(entry.querySelector('.tournament-score-input').value);
+                const holes = parseInt(entry.querySelector('.tournament-holes-input').value);
+                tournamentScores.push({
+                    round_number: index + 1,
+                    gross_score: score,
+                    holes_played: holes
+                });
+            });
+
+            // Collect casual scores (if any)
+            let casualScores = null;
+            const casualEntries = document.querySelectorAll('#casual-scores-container .score-entry');
+            if (casualEntries.length > 0) {
+                casualScores = [];
+                casualEntries.forEach((entry, index) => {
+                    const score = parseInt(entry.querySelector('.casual-score-input').value);
+                    const holes = parseInt(entry.querySelector('.casual-holes-input').value);
+                    casualScores.push({
+                        round_number: index + 1,
+                        gross_score: score,
+                        holes_played: holes
+                    });
+                });
+            }
+
+            try {
+                const requestBody = {
+                    golfer: golfer,
+                    course: course,
+                    tournament_scores: tournamentScores
+                };
+                
+                if (casualScores) {
+                    requestBody.casual_scores = casualScores;
+                }
+
+                const response = await fetch(`${API_BASE}/analyze/sandbagging`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                if (!response.ok) throw new Error('Failed to analyze for sandbagging');
+                const data = await response.json();
+
+                // Update risk card
+                document.getElementById('sand-golfer-name').textContent = 
+                    `${data.golfer_name} (${data.handicap_index} HCP)`;
+                
+                const riskBadge = document.getElementById('risk-badge');
+                const riskCard = document.getElementById('risk-card');
+                riskBadge.textContent = `RISK: ${data.risk_level}`;
+                
+                // Style based on risk level
+                const riskColors = {
+                    'LOW': { bg: '#e8f5e9', border: '#4caf50', badge: '#4caf50' },
+                    'MODERATE': { bg: '#fff3e0', border: '#ff9800', badge: '#ff9800' },
+                    'HIGH': { bg: '#fff3e0', border: '#ff5722', badge: '#ff5722' },
+                    'SEVERE': { bg: '#ffebee', border: '#f44336', badge: '#f44336' }
+                };
+                
+                const colors = riskColors[data.risk_level];
+                riskCard.style.background = colors.bg;
+                riskCard.style.borderColor = colors.border;
+                riskBadge.style.background = colors.badge;
+                
+                document.getElementById('risk-score-display').textContent = data.sandbagging_risk_score.toFixed(1);
+                document.getElementById('risk-score-display').style.color = colors.badge;
+                
+                document.getElementById('sand-summary').innerHTML = data.summary;
+                document.getElementById('sand-recommendation').textContent = data.recommendation;
+
+                // Update statistics
+                document.getElementById('sand-avg-score').textContent = data.tournament_avg_score.toFixed(1);
+                
+                const avgVsExpected = data.tournament_avg_vs_expected;
+                const avgVsExpectedEl = document.getElementById('sand-avg-vs-expected');
+                avgVsExpectedEl.textContent = (avgVsExpected > 0 ? '+' : '') + avgVsExpected.toFixed(1);
+                avgVsExpectedEl.style.color = avgVsExpected < 0 ? 'var(--success)' : 'var(--error)';
+                avgVsExpectedEl.style.fontWeight = 'bold';
+                
+                document.getElementById('sand-percentile').textContent = data.tournament_performance_percentile.toFixed(1) + '%';
+                document.getElementById('sand-volatility').textContent = 
+                    `${data.score_volatility.toFixed(1)} (${data.volatility_vs_expected})`;
+                document.getElementById('sand-joint-prob').textContent = 
+                    (data.probability_all_tournament_scores * 100).toFixed(4) + '%';
+                
+                // Casual comparison (if available)
+                if (data.has_casual_comparison) {
+                    document.getElementById('casual-comparison').style.display = 'block';
+                    document.getElementById('sand-casual-diff').textContent = 
+                        (data.casual_vs_tournament_diff > 0 ? '+' : '') + data.casual_vs_tournament_diff.toFixed(1) + ' strokes';
+                } else {
+                    document.getElementById('casual-comparison').style.display = 'none';
+                }
+
+                // Display red flags
+                const flagsContainer = document.getElementById('red-flags-container');
+                document.getElementById('red-flags-count').textContent = data.red_flags.length;
+                
+                if (data.red_flags.length === 0) {
+                    flagsContainer.innerHTML = '<p style="color: var(--text-secondary); font-style: italic;">No red flags detected</p>';
+                } else {
+                    flagsContainer.innerHTML = '';
+                    data.red_flags.forEach(flag => {
+                        const flagEl = document.createElement('div');
+                        const severityColors = {
+                            'LOW': '#2196f3',
+                            'MEDIUM': '#ff9800',
+                            'HIGH': '#ff5722',
+                            'CRITICAL': '#f44336'
+                        };
+                        
+                        flagEl.style.cssText = `
+                            margin-bottom: 15px;
+                            padding: 15px;
+                            border-left: 4px solid ${severityColors[flag.severity]};
+                            background: #f9f9f9;
+                            border-radius: 4px;
+                        `;
+                        
+                        flagEl.innerHTML = `
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <strong style="color: ${severityColors[flag.severity]};">
+                                    ${flag.severity} SEVERITY
+                                </strong>
+                                <span style="font-size: 0.85rem; color: var(--text-secondary);">
+                                    ${flag.flag_type.replace(/_/g, ' ')}
+                                </span>
+                            </div>
+                            <div style="font-weight: 600; margin-bottom: 8px;">${flag.description}</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 5px;">
+                                📊 ${flag.evidence}
+                            </div>
+                            ${flag.probability_note ? `<div style="font-style: italic; color: var(--text-secondary); font-size: 0.85rem;">
+                                ℹ️ ${flag.probability_note}
+                            </div>` : ''}
+                        `;
+                        
+                        flagsContainer.appendChild(flagEl);
+                    });
+                }
 
                 loading.classList.remove('active');
                 results.style.display = 'block';
