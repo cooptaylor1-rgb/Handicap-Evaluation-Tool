@@ -2535,6 +2535,162 @@
             display: none;
         }
         
+        /* Watchlist toggle button */
+        .watchlist-toggle {
+            position: fixed;
+            top: 150px;
+            right: 0;
+            background: var(--explosives-red);
+            color: white;
+            font-size: 1.5rem;
+            padding: 15px 10px;
+            border: 3px solid var(--dirt-brown);
+            border-right: none;
+            border-radius: var(--radius-md) 0 0 var(--radius-md);
+            cursor: pointer;
+            z-index: 901;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+        }
+        
+        .watchlist-toggle:hover {
+            background: var(--grass-yellow);
+            color: var(--bushwood-dark);
+            transform: translateX(-5px);
+        }
+        
+        .watchlist-toggle .badge-count {
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            background: var(--bushwood-dark);
+            color: white;
+            font-size: 0.7rem;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-body);
+            font-weight: bold;
+        }
+        
+        /* Watchlist panel */
+        .watchlist-panel {
+            position: fixed;
+            top: 80px;
+            left: -320px;
+            width: 300px;
+            max-height: calc(100vh - 100px);
+            background: linear-gradient(135deg, #1a1208 0%, #2a1f0f 100%);
+            border: 3px solid var(--explosives-red);
+            border-left: none;
+            border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+            box-shadow: var(--shadow-lg);
+            z-index: 900;
+            transition: left 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            overflow-y: auto;
+        }
+        
+        .watchlist-panel.open {
+            left: 0;
+        }
+        
+        .watchlist-header {
+            background: var(--explosives-red);
+            color: white;
+            padding: 15px 20px;
+            font-family: var(--font-display);
+            font-size: 1rem;
+            letter-spacing: 1px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+        }
+        
+        .watchlist-empty {
+            padding: 30px 20px;
+            text-align: center;
+            color: var(--gopher-light);
+            font-family: var(--font-handwritten);
+        }
+        
+        .watchlist-items {
+            padding: 10px;
+        }
+        
+        .watchlist-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-md);
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--grass-yellow);
+        }
+        
+        .watchlist-item .item-name {
+            font-family: var(--font-display);
+            color: var(--grass-yellow);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .watchlist-item .item-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--gopher-light);
+        }
+        
+        .watchlist-item .item-score {
+            font-weight: bold;
+            color: var(--explosives-red);
+        }
+        
+        .watchlist-item .item-date {
+            opacity: 0.7;
+        }
+        
+        .watchlist-item .item-remove {
+            background: transparent;
+            border: none;
+            color: var(--explosives-red);
+            cursor: pointer;
+            padding: 2px 5px;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+        
+        .watchlist-item .item-remove:hover {
+            opacity: 1;
+        }
+        
+        .watchlist-clear {
+            display: block;
+            width: calc(100% - 20px);
+            margin: 10px;
+            padding: 10px;
+            background: transparent;
+            border: 1px dashed var(--explosives-red);
+            color: var(--explosives-red);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+        
+        .watchlist-clear:hover {
+            background: var(--explosives-red);
+            color: white;
+        }
+        
+        body.serious-mode .watchlist-toggle,
+        body.serious-mode .watchlist-panel {
+            display: none;
+        }
+
         /* Achievement unlock notification */
         .achievement-notification {
             position: fixed;
@@ -4195,6 +4351,12 @@
         <span class="badge-count" id="achievementCount">0</span>
     </button>
     
+    <!-- 📋 WATCHLIST TOGGLE -->
+    <button class="watchlist-toggle caddyshack-only" id="watchlistToggle" title="Noonan Watchlist" onclick="toggleWatchlistPanel()">
+        📋
+        <span class="badge-count" id="watchlistCount">0</span>
+    </button>
+    
     <div class="achievements-panel" id="achievementsPanel">
         <div class="achievements-header">
             SPACKLER'S LICENSE BUREAU
@@ -4216,6 +4378,23 @@
         <div class="achievements-list" id="achievementsList">
             <!-- Achievements will be populated by JS -->
         </div>
+    </div>
+    
+    <!-- 📋 WATCHLIST PANEL -->
+    <div class="watchlist-panel" id="watchlistPanel">
+        <div class="watchlist-header">
+            📋 NOONAN WATCHLIST
+        </div>
+        <div class="watchlist-empty" id="watchlistEmpty">
+            <p>No suspects yet...</p>
+            <p style="font-size: 0.85rem; opacity: 0.7;">Analyze golfers and add them to your watchlist.</p>
+        </div>
+        <div class="watchlist-items" id="watchlistItems">
+            <!-- Watchlist items populated by JS -->
+        </div>
+        <button class="watchlist-clear" id="watchlistClear" onclick="clearWatchlist()">
+            🗑️ Clear Watchlist
+        </button>
     </div>
     
     <!-- Achievement Notification Popup -->
@@ -5312,6 +5491,88 @@
             
             // 🏆 Check watchlist achievements
             checkAchievements();
+            
+            // Update watchlist panel
+            updateWatchlistPanel();
+        }
+        
+        // Toggle watchlist panel
+        function toggleWatchlistPanel() {
+            const panel = document.getElementById('watchlistPanel');
+            panel.classList.toggle('open');
+            
+            if (panel.classList.contains('open')) {
+                updateWatchlistPanel();
+            }
+        }
+        
+        // Update watchlist panel UI
+        function updateWatchlistPanel() {
+            let watchlist = [];
+            try {
+                watchlist = JSON.parse(localStorage.getItem('spackler_watchlist') || '[]');
+            } catch (e) {
+                watchlist = [];
+            }
+            
+            const itemsContainer = document.getElementById('watchlistItems');
+            const emptyMessage = document.getElementById('watchlistEmpty');
+            const clearButton = document.getElementById('watchlistClear');
+            const countBadge = document.getElementById('watchlistCount');
+            
+            // Update badge count
+            if (countBadge) {
+                countBadge.textContent = watchlist.length;
+            }
+            
+            if (watchlist.length === 0) {
+                emptyMessage.style.display = 'block';
+                itemsContainer.innerHTML = '';
+                clearButton.style.display = 'none';
+                return;
+            }
+            
+            emptyMessage.style.display = 'none';
+            clearButton.style.display = 'block';
+            
+            // Sort by most recent first
+            watchlist.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            
+            itemsContainer.innerHTML = watchlist.map((item, index) => `
+                <div class="watchlist-item">
+                    <div class="item-name">${item.name.split('(')[0].trim()}</div>
+                    <div class="item-details">
+                        <span class="item-score">Score: ${item.score}</span>
+                        <span class="item-date">${item.date || 'N/A'}</span>
+                        <button class="item-remove" onclick="removeFromWatchlist(${index})" title="Remove">✕</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Remove from watchlist
+        function removeFromWatchlist(index) {
+            let watchlist = [];
+            try {
+                watchlist = JSON.parse(localStorage.getItem('spackler_watchlist') || '[]');
+            } catch (e) {
+                watchlist = [];
+            }
+            
+            const removed = watchlist.splice(index, 1)[0];
+            localStorage.setItem('spackler_watchlist', JSON.stringify(watchlist));
+            
+            showGopherQuip(`Removed from watchlist. They're not out of the woods yet though...`);
+            updateWatchlistPanel();
+        }
+        
+        // Clear entire watchlist
+        function clearWatchlist() {
+            if (confirm('Clear the entire Noonan Watchlist? This cannot be undone.')) {
+                localStorage.setItem('spackler_watchlist', '[]');
+                showGopherQuip("Watchlist cleared. Fresh start. New hunt begins.");
+                updateWatchlistPanel();
+            }
         }
         
         // 📤 Share Roast function
@@ -5891,6 +6152,7 @@
             initSoundToggle();
             updateFooterQuote();
             refreshCarlTip();
+            updateWatchlistPanel();
         }
         
         // Carl's random tips for the tip banner
