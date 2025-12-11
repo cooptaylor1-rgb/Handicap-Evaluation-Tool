@@ -3575,21 +3575,6 @@
                 height: 30px;
             }
             
-            /* Gopher repositioning */
-            .gopher-popup {
-                bottom: 60px;
-                right: 10px;
-                width: 2.5rem;
-                height: 2.5rem;
-            }
-            
-            .gopher-speech {
-                bottom: 120px;
-                right: 10px;
-                left: 10px;
-                max-width: none;
-            }
-            
             /* Achievement panel full-width */
             .achievements-panel {
                 width: 100%;
@@ -3598,40 +3583,19 @@
             }
             
             .achievements-toggle {
-                top: auto;
-                bottom: 70px;
-                right: 10px;
-                width: 40px;
-                height: 40px;
-                font-size: 1rem;
+                display: none; /* Hide on mobile to reduce clutter */
             }
             
             /* Sound toggle repositioning */
             .sound-toggle {
-                bottom: 70px;
-                left: 10px;
+                display: none; /* Hide on mobile */
             }
             
-            /* Stack the Caddyshack feature toggles vertically on mobile */
+            /* HIDE the toggle buttons on mobile - too cluttered */
             .watchlist-toggle,
             .history-toggle,
             .stats-toggle {
-                right: 10px;
-                width: 40px;
-                height: 40px;
-                font-size: 1rem;
-            }
-            
-            .watchlist-toggle {
-                bottom: 120px;
-            }
-            
-            .history-toggle {
-                bottom: 170px;
-            }
-            
-            .stats-toggle {
-                bottom: 220px;
+                display: none;
             }
             
             /* Make panels full-width on mobile */
@@ -3640,51 +3604,77 @@
                 width: 100%;
                 right: -100%;
                 border-radius: 0;
+                top: 0;
+                height: 100%;
             }
             
             .stats-panel {
-                width: 95%;
-                max-width: none;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-                padding: 15px;
-            }
-            
-            .stat-box .stat-number {
-                font-size: 1.4rem;
+                display: none; /* Hide stats panel on mobile */
             }
             
             /* Simplified header */
             header {
-                padding: 15px;
+                padding: 12px 15px;
+                text-align: center;
+            }
+            
+            .header-content {
+                width: 100%;
             }
             
             header h1 {
-                font-size: 1.2rem;
+                font-size: 1.3rem;
+                margin-bottom: 4px;
             }
             
-            header p,
-            .header-tagline {
-                font-size: 0.8rem;
+            header p {
+                font-size: 0.85rem;
+                margin-bottom: 0;
             }
             
             .header-tagline {
                 display: none;
             }
             
-            /* Compact tabs */
+            /* Mode toggle - inline with header */
+            .mode-toggle {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                padding: 6px 10px;
+                font-size: 0.75rem;
+            }
+            
+            .mode-toggle .mode-text {
+                display: none;
+            }
+            
+            .mode-toggle .gopher-icon {
+                width: 1.5em;
+                height: 1.5em;
+            }
+            
+            /* Better tabs for mobile - horizontal scroll */
             .tabs {
-                gap: 5px;
-                padding: 5px;
+                display: flex;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                gap: 4px;
+                padding: 6px;
+                margin-top: 10px;
+                scrollbar-width: none;
+            }
+            
+            .tabs::-webkit-scrollbar {
+                display: none;
             }
             
             .tab {
-                padding: 10px 12px;
-                font-size: 0.75rem;
-                min-width: 80px;
+                flex: 0 0 auto;
+                padding: 10px 14px;
+                font-size: 0.8rem;
+                min-width: auto;
+                white-space: nowrap;
             }
             
             /* Hide emoji decorations on small screens */
@@ -3712,23 +3702,30 @@
             }
             
             /* Splash screen mobile */
+            .splash-silhouette {
+                width: 220px;
+                max-width: 70vw;
+            }
+            
             .splash-logo {
-                font-size: 1.3rem;
+                font-size: 1.2rem;
                 padding: 0 20px;
             }
             
             .splash-tagline {
-                font-size: 0.9rem;
+                font-size: 0.85rem;
                 padding: 0 20px;
             }
             
             .splash-buttons {
                 flex-direction: column;
                 gap: 10px;
+                width: 100%;
+                padding: 0 20px;
             }
             
             .splash-buttons button {
-                width: 80%;
+                width: 100%;
             }
             
             /* WANTED poster mobile */
@@ -3747,6 +3744,47 @@
             
             .footer-quote {
                 font-size: 0.85rem;
+            }
+            
+            /* Carl's tip banner */
+            .carl-tip {
+                padding: 10px 12px;
+                font-size: 0.85rem;
+                margin-bottom: 10px;
+            }
+            
+            .carl-tip .tip-icon {
+                display: none;
+            }
+            
+            /* Quick check banner mobile */
+            .quick-check-banner {
+                padding: 15px;
+                margin: 10px 0;
+            }
+            
+            .quick-check-banner h3 {
+                font-size: 1.1rem;
+            }
+            
+            .quick-check-banner p {
+                font-size: 0.85rem;
+            }
+            
+            /* Container padding */
+            .container {
+                padding: 8px;
+            }
+            
+            /* Form sections */
+            .form-section {
+                padding: 12px;
+                margin-bottom: 12px;
+            }
+            
+            .form-section h3 {
+                font-size: 1rem;
+                margin-bottom: 12px;
             }
             
             /* Hide grass texture on mobile for performance */
@@ -3781,34 +3819,55 @@
             }
         }
         
-        /* Extra small phones */
+        /* Extra small phones (iPhone SE, etc.) */
         @media (max-width: 380px) {
             header h1 {
-                font-size: 1rem;
+                font-size: 1.1rem;
+            }
+            
+            header p {
+                font-size: 0.8rem;
             }
             
             .tab {
                 padding: 8px 10px;
-                font-size: 0.7rem;
-                min-width: 65px;
+                font-size: 0.75rem;
+            }
+            
+            .splash-silhouette {
+                width: 180px;
             }
             
             .splash-logo {
-                font-size: 1.1rem;
-            }
-            
-            .form-section h3 {
                 font-size: 1rem;
             }
             
-            .mode-toggle {
-                padding: 8px 12px;
-                font-size: 0.8rem;
+            .form-section h3 {
+                font-size: 0.95rem;
             }
             
-            .gopher-popup {
-                width: 2rem;
-                height: 2rem;
+            .mode-toggle {
+                padding: 5px 8px;
+            }
+            
+            .quick-check-banner h3 {
+                font-size: 1rem;
+            }
+        }
+        
+        /* iPhone notch/safe area support */
+        @supports (padding-top: env(safe-area-inset-top)) {
+            header {
+                padding-top: calc(12px + env(safe-area-inset-top));
+            }
+            
+            .splash-screen {
+                padding-top: env(safe-area-inset-top);
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+            
+            footer {
+                padding-bottom: calc(20px + env(safe-area-inset-bottom));
             }
         }
         
