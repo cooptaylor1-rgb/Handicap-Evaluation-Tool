@@ -673,6 +673,56 @@
         body.serious-mode .gopher-dirt {
             display: none !important;
         }
+        
+        /* ============================================
+           💡 CARL'S TIP BANNER - Wisdom from the Lama
+           ============================================ */
+        .carl-tip {
+            background: linear-gradient(135deg, var(--bushwood-dark) 0%, #2e5a2f 100%);
+            color: var(--gopher-light);
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: var(--shadow-md);
+            border-left: 4px solid var(--grass-yellow);
+        }
+        
+        .carl-tip .tip-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .carl-tip .tip-text {
+            flex: 1;
+            font-family: var(--font-handwritten);
+            font-size: 1rem;
+            line-height: 1.4;
+            transition: opacity 0.2s ease;
+        }
+        
+        .carl-tip .tip-refresh {
+            background: transparent;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: var(--radius-sm);
+            transition: all 0.3s ease;
+            opacity: 0.7;
+        }
+        
+        .carl-tip .tip-refresh:hover {
+            opacity: 1;
+            transform: rotate(180deg);
+            background: rgba(255,255,255,0.1);
+        }
+        
+        body.serious-mode .carl-tip {
+            display: none;
+        }
 
         /* ============================================
            📁 TABS - Dynamite Buttons & Manila Folders
@@ -2717,6 +2767,135 @@
         body.serious-mode .sound-toggle {
             display: none;
         }
+        
+        /* Help toggle button */
+        .help-toggle {
+            position: fixed;
+            bottom: 20px;
+            left: 75px;
+            background: var(--bushwood-green);
+            border: 2px solid var(--grass-yellow);
+            border-radius: var(--radius-round);
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--grass-yellow);
+            box-shadow: var(--shadow-md);
+            z-index: 900;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .help-toggle:hover {
+            background: var(--grass-yellow);
+            color: var(--bushwood-dark);
+            transform: scale(1.1);
+        }
+        
+        body.serious-mode .help-toggle {
+            display: none;
+        }
+        
+        /* Shortcuts help overlay */
+        .shortcuts-help {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 15000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .shortcuts-help.active {
+            display: flex;
+        }
+        
+        .shortcuts-content {
+            background: linear-gradient(135deg, var(--paper-cream) 0%, var(--paper-aged) 100%);
+            padding: 30px;
+            border-radius: var(--radius-lg);
+            max-width: 500px;
+            width: 90%;
+            box-shadow: var(--shadow-lg);
+            border: 3px solid var(--dirt-brown);
+        }
+        
+        .shortcuts-content h3 {
+            text-align: center;
+            font-family: var(--font-display);
+            color: var(--bushwood-dark);
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+        
+        .shortcuts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .shortcut-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .shortcut-item kbd {
+            background: var(--bushwood-dark);
+            color: var(--grass-yellow);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            display: inline-block;
+            width: fit-content;
+        }
+        
+        .shortcut-item span {
+            font-family: var(--font-handwritten);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .shortcuts-close {
+            display: block;
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px;
+            background: var(--bushwood-green);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: var(--font-display);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .shortcuts-close:hover {
+            background: var(--grass-yellow);
+            color: var(--bushwood-dark);
+        }
+        
+        @media (max-width: 500px) {
+            .shortcuts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .help-toggle {
+                left: auto;
+                right: 10px;
+                bottom: 130px;
+            }
+        }
 
         /* ============================================
            🦶 FOOTER - Muddy Footprints
@@ -3215,6 +3394,13 @@
     </header>
 
     <div class="container">
+        <!-- Carl's Tip Banner -->
+        <div class="carl-tip caddyshack-only" id="carl-tip">
+            <span class="tip-icon">💡</span>
+            <span class="tip-text" id="carl-tip-text">Loading wisdom from the Himalayas...</span>
+            <button class="tip-refresh" onclick="refreshCarlTip()" title="Get new tip">🔄</button>
+        </div>
+        
         <div class="tabs">
             <button class="tab active" onclick="showTab('individual')">Single Round</button>
             <button class="tab" onclick="showTab('team')">Team Best-Ball</button>
@@ -4044,9 +4230,56 @@
     <!-- Confetti Container -->
     <div class="confetti-container" id="confettiContainer"></div>
     
+    <!-- Keyboard Shortcuts Help -->
+    <div class="shortcuts-help" id="shortcutsHelp">
+        <div class="shortcuts-content">
+            <h3>⌨️ Keyboard Shortcuts & Easter Eggs</h3>
+            <div class="shortcuts-grid">
+                <div class="shortcut-item">
+                    <kbd>?</kbd>
+                    <span>Show this help</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>↑↑↓↓←→←→BA</kbd>
+                    <span>Total Consciousness</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>Type: lama</kbd>
+                    <span>Dalai Lama quote</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>Type: noonan</kbd>
+                    <span>NOONAN! effect</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>Type: gunga</kbd>
+                    <span>Gunga galunga</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>Tap gopher 5x</kbd>
+                    <span>Night vision mode</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>Triple-click title</kbd>
+                    <span>Random movie quote</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>Shake phone</kbd>
+                    <span>Explosion effect</span>
+                </div>
+            </div>
+            <button class="shortcuts-close" onclick="toggleShortcutsHelp()">Got it!</button>
+        </div>
+    </div>
+    
     <!-- Sound Toggle -->
     <button class="sound-toggle" id="soundToggle" title="Toggle Sound Effects">
         🔊
+    </button>
+    
+    <!-- Help Button -->
+    <button class="help-toggle caddyshack-only" id="helpToggle" onclick="toggleShortcutsHelp()" title="Keyboard shortcuts (?)">
+        ?
     </button>
 
     <footer>
@@ -4057,8 +4290,11 @@
             <a href="/docs" target="_blank">📋 API Docs</a> | 
             Licensed to kill... handicaps.
         </p>
-        <p class="footer-quote">
+        <p class="footer-quote" id="footer-quote">
             "So I got that goin' for me, which is nice."
+        </p>
+        <p class="footer-quote-attribution" id="footer-quote-attr" style="font-size: 0.75rem; opacity: 0.7; margin-top: 5px;">
+            — Carl Spackler, Quote of the Day
         </p>
         <p style="font-size: 0.75rem; margin-top: 12px; opacity: 0.7;">
             ⚠️ Statistical patterns only. Does not accuse anyone of actual cheating.
@@ -4592,7 +4828,31 @@
             if (konamiSequence.join(',') === konamiCode.join(',')) {
                 activatePhilosophyMode();
             }
+            
+            // ? key shows shortcuts help (when not in input field)
+            if (e.key === '?' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+                toggleShortcutsHelp();
+            }
+            
+            // Escape closes any overlay
+            if (e.key === 'Escape') {
+                const shortcuts = document.getElementById('shortcutsHelp');
+                if (shortcuts?.classList.contains('active')) {
+                    toggleShortcutsHelp();
+                }
+                if (philosophyMode) {
+                    activatePhilosophyMode();
+                }
+            }
         });
+        
+        // Toggle shortcuts help panel
+        function toggleShortcutsHelp() {
+            const panel = document.getElementById('shortcutsHelp');
+            if (panel) {
+                panel.classList.toggle('active');
+            }
+        }
         
         function activatePhilosophyMode() {
             philosophyMode = !philosophyMode;
@@ -5629,6 +5889,56 @@
             checkAchievements();
             updateAchievementUI();
             initSoundToggle();
+            updateFooterQuote();
+            refreshCarlTip();
+        }
+        
+        // Carl's random tips for the tip banner
+        const carlTips = [
+            "A looper's advice: Check the handicap index first. Trust, but verify.",
+            "In my experience, if a score looks too good to be true... it probably is.",
+            "The Dalai Lama told me: 'Watch the patterns, not just the numbers.'",
+            "Remember: Everyone has a hot streak. But statistical improbability? That's different.",
+            "I once caddied for a sandbagger in Tibet. Total consciousness didn't help him cheat.",
+            "Big hitter, the Lama. Also said: 'Use multiple rounds for better analysis.'",
+            "Licensed to kill gophers AND spot handicap inflation. Multitasking.",
+            "Course difficulty matters. A 72 at Augusta is not a 72 at the local muni.",
+            "When the joint probability gets too low, something fishy is going on.",
+            "My hybrid grass? It's sticky. Like the numbers on a sandbagger's scorecard.",
+            "Cinderella story? More like Pinnochio story when those scores are fake.",
+            "Check the variance. Consistent baggers are easier to spot than lucky ones.",
+            "I've outsmarted even myself tracking these numbers. And some sandbaggers too.",
+            "Casual rounds vs tournament rounds... that differential tells a story.",
+            "Gunga galunga. Also: Always check the red flags section."
+        ];
+        
+        // Refresh Carl's tip
+        function refreshCarlTip() {
+            const tipText = document.getElementById('carl-tip-text');
+            if (tipText && currentMode === 'caddyshack') {
+                const tip = carlTips[Math.floor(Math.random() * carlTips.length)];
+                tipText.style.opacity = '0';
+                setTimeout(() => {
+                    tipText.textContent = tip;
+                    tipText.style.opacity = '1';
+                }, 200);
+            }
+        }
+        
+        // Update footer with Quote of the Day
+        function updateFooterQuote() {
+            if (currentMode !== 'caddyshack') return;
+            
+            const quote = getQuoteOfTheDay();
+            const footerQuote = document.getElementById('footer-quote');
+            const footerAttr = document.getElementById('footer-quote-attr');
+            
+            if (footerQuote && quote) {
+                footerQuote.textContent = `"${quote.quote}"`;
+                if (footerAttr) {
+                    footerAttr.textContent = `— ${quote.character}, Quote of the Day`;
+                }
+            }
         }
 
         function showTab(tabName) {
