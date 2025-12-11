@@ -142,24 +142,6 @@
             display: none;
         }
         
-        /* Gopher mounds decoration */
-        body::after {
-            content: '🕳️';
-            position: fixed;
-            bottom: 20px;
-            left: 30px;
-            font-size: 2rem;
-            opacity: 0.4;
-            pointer-events: none;
-            z-index: 0;
-            animation: moundPeek 10s ease-in-out infinite;
-        }
-        
-        @keyframes moundPeek {
-            0%, 90%, 100% { transform: scale(1); }
-            95% { transform: scale(1.2); }
-        }
-        
         body.serious-mode::after {
             display: none;
         }
