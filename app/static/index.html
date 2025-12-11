@@ -3893,6 +3893,293 @@
                 -webkit-overflow-scrolling: touch;
             }
         }
+        
+        /* ============================================
+           🆕 FIRST-TIME USER WELCOME MODAL
+           ============================================ */
+        .welcome-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 100000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .welcome-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .welcome-content {
+            background: linear-gradient(180deg, #1a2b1c 0%, #0f1a10 100%);
+            border: 3px solid var(--grass-yellow);
+            border-radius: var(--radius-lg);
+            max-width: 500px;
+            width: 100%;
+            padding: 30px;
+            text-align: center;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .welcome-modal.show .welcome-content {
+            transform: scale(1);
+        }
+        
+        .welcome-title {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            color: var(--grass-yellow);
+            margin-bottom: 10px;
+        }
+        
+        .welcome-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+            margin-bottom: 25px;
+        }
+        
+        .welcome-steps {
+            text-align: left;
+            margin: 20px 0;
+        }
+        
+        .welcome-step {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-md);
+            border-left: 3px solid var(--grass-yellow);
+        }
+        
+        .welcome-step-num {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            color: var(--grass-yellow);
+            min-width: 30px;
+        }
+        
+        .welcome-step-text {
+            color: white;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .welcome-step-text strong {
+            color: var(--grass-yellow);
+        }
+        
+        .welcome-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+        
+        .welcome-btn {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: var(--font-display);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .welcome-btn-primary {
+            background: var(--grass-yellow);
+            color: var(--bushwood-dark);
+        }
+        
+        .welcome-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(232, 213, 100, 0.4);
+        }
+        
+        .welcome-btn-secondary {
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .welcome-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .welcome-skip {
+            margin-top: 15px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        
+        .welcome-skip:hover {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Quick Check Banner for Suspects tab */
+        .quick-check-banner {
+            background: linear-gradient(135deg, #2d5a2e 0%, #1a3d1b 100%);
+            border: 2px solid var(--grass-yellow);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .quick-check-title {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            color: var(--grass-yellow);
+            margin-bottom: 8px;
+        }
+        
+        .quick-check-subtitle {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        /* Form Help Tooltips */
+        .form-group {
+            position: relative;
+        }
+        
+        .form-help {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: var(--grass-yellow);
+            color: var(--bushwood-dark);
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 16px;
+            margin-left: 5px;
+            cursor: help;
+            vertical-align: middle;
+        }
+        
+        .form-help:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bushwood-dark);
+            color: white;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: normal;
+            white-space: nowrap;
+            max-width: 250px;
+            white-space: normal;
+            z-index: 1000;
+            box-shadow: var(--shadow-md);
+        }
+        
+        /* Check Another Player Button */
+        .check-another-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            background: linear-gradient(135deg, var(--fairway-green) 0%, #1a4d1e 100%);
+            border: 2px solid var(--grass-yellow);
+            border-radius: var(--radius-md);
+            color: white;
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .check-another-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(232, 213, 100, 0.3);
+        }
+        
+        /* Results Quick Summary Card */
+        .results-quick-summary {
+            background: linear-gradient(135deg, #1a2a1c 0%, #0f1a10 100%);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid;
+            text-align: center;
+        }
+        
+        .results-quick-summary.verdict-clean {
+            border-color: var(--fairway-green);
+        }
+        
+        .results-quick-summary.verdict-suspicious {
+            border-color: var(--grass-yellow);
+        }
+        
+        .results-quick-summary.verdict-likely {
+            border-color: var(--explosives-red);
+        }
+        
+        .summary-verdict {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .verdict-clean .summary-verdict { color: var(--fairway-green); }
+        .verdict-suspicious .summary-verdict { color: var(--grass-yellow); }
+        .verdict-likely .summary-verdict { color: var(--explosives-red); }
+        
+        .summary-explanation {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .summary-score {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        
+        .verdict-clean .summary-score { color: var(--fairway-green); }
+        .verdict-suspicious .summary-score { color: var(--grass-yellow); }
+        .verdict-likely .summary-score { color: var(--explosives-red); }
+        
+        /* Mobile optimizations for welcome modal */
+        @media (max-width: 600px) {
+            .welcome-content {
+                padding: 20px;
+            }
+            
+            .welcome-title {
+                font-size: 1.4rem;
+            }
+            
+            .welcome-buttons {
+                flex-direction: column;
+            }
+            
+            .welcome-step {
+                padding: 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -3912,6 +4199,46 @@
         </div>
     </div>
     
+    <!-- 🆕 FIRST-TIME USER WELCOME MODAL -->
+    <div class="welcome-modal" id="welcomeModal">
+        <div class="welcome-content">
+            <div class="welcome-title">🏌️ Member-Guest? Check Your Opponents!</div>
+            <div class="welcome-subtitle">
+                Quickly analyze if the other team's handicaps seem legit.
+            </div>
+            
+            <div class="welcome-steps">
+                <div class="welcome-step">
+                    <div class="welcome-step-num">1</div>
+                    <div class="welcome-step-text">
+                        <strong>Enter their handicap</strong> - Ask or check the tournament sheet
+                    </div>
+                </div>
+                <div class="welcome-step">
+                    <div class="welcome-step-num">2</div>
+                    <div class="welcome-step-text">
+                        <strong>Add their tournament scores</strong> - What did they shoot today and in past events?
+                    </div>
+                </div>
+                <div class="welcome-step">
+                    <div class="welcome-step-num">3</div>
+                    <div class="welcome-step-text">
+                        <strong>Get the verdict</strong> - We'll flag suspicious patterns instantly
+                    </div>
+                </div>
+            </div>
+            
+            <div class="welcome-buttons">
+                <button class="welcome-btn welcome-btn-primary" onclick="startQuickCheck()">
+                    🔍 Quick Check Now
+                </button>
+            </div>
+            <div class="welcome-skip" onclick="dismissWelcome()">
+                I know how this works, skip intro
+            </div>
+        </div>
+    </div>
+    
     <!-- GOPHER COMMAND CENTER - The Real Star -->
     <div class="gopher-hole" id="gopher-hole"></div>
     <div class="gopher-dirt" id="gopher-dirt"></div>
@@ -3920,9 +4247,9 @@
 
     <header>
         <div class="header-content">
-            <h1>Spackler's Command Center</h1>
-            <p>Groundskeeper's Handicap Integrity & Sandbagger Detection System</p>
-            <p class="header-tagline">"Cinderella story... out of nowhere... a former greenskeeper now tracking cheaters at Augusta."</p>
+            <h1>Spackler's Handicap Checker</h1>
+            <p>Quick Sandbagger Detection for Tournaments & Member-Guests</p>
+            <p class="header-tagline caddyshack-only">"Cinderella story... out of nowhere... a former greenskeeper now tracking cheaters at Augusta."</p>
         </div>
         <button class="mode-toggle" id="mode-toggle" onclick="toggleMode()" title="Switch between Caddyshack and Serious mode">
             <span class="mode-icon"><img src="/static/images/gopher.svg" alt="" class="gopher-icon"></span>
@@ -3939,15 +4266,15 @@
         </div>
         
         <div class="tabs">
-            <button class="tab active" onclick="showTab('individual')">Single Round</button>
+            <button class="tab" onclick="showTab('individual')">Single Round</button>
             <button class="tab" onclick="showTab('team')">Team Best-Ball</button>
             <button class="tab" onclick="showTab('consecutive')">Hot Streak Check</button>
             <button class="tab" onclick="showTab('completed')">Score Analysis</button>
-            <button class="tab" onclick="showTab('sandbagging')">🔍 Suspects</button>
+            <button class="tab active" onclick="showTab('sandbagging')" id="suspectsTab">🔍 Check Opponent</button>
         </div>
 
         <!-- Individual Player Tab -->
-        <div id="individual-tab" class="tab-content active">
+        <div id="individual-tab" class="tab-content">
             <form id="individual-form">
                 <div class="form-section">
                     <h3>Golfer Intel</h3>
@@ -4509,7 +4836,16 @@
     </div>
 
     <!-- Sandbagging Detection Tab -->
-    <div id="sandbagging-tab" class="tab-content">
+    <div id="sandbagging-tab" class="tab-content active">
+        <!-- Quick Check Banner for First-Time Users -->
+        <div class="quick-check-banner" id="quickCheckBanner">
+            <div class="quick-check-title">🏌️ Quick Opponent Check</div>
+            <div class="quick-check-subtitle">
+                At a member-guest? Enter your opponent's handicap and their scores from today.<br>
+                We'll tell you if something looks fishy in under 30 seconds.
+            </div>
+        </div>
+        
         <div class="clubhouse-banner" id="sand-banner">
             🔍 The Sandbagger Watch List 🔍
             <div style="font-size: 0.8rem; margin-top: 5px; opacity: 0.9;">
@@ -4520,58 +4856,79 @@
         <form id="sandbagging-form">
             <div class="form-section">
                 <h3>🎯 Golfer Under Review</h3>
-                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 15px; font-style: italic;" class="caddyshack-only">
-                    Remember: We're looking for patterns, not making accusations. Every golfer deserves fair review.
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 15px;">
+                    💡 <strong>Tip:</strong> Check the tournament pairing sheet for handicaps, or just ask!
                 </p>
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="sand-name">Golfer Name</label>
-                        <input type="text" id="sand-name" value="Player Name" required>
+                        <label for="sand-name">
+                            Golfer Name
+                            <span class="form-help" data-tooltip="Who are you checking? E.g., 'Bob Smith' or 'Team 7 Player'">?</span>
+                        </label>
+                        <input type="text" id="sand-name" placeholder="e.g., Bob Smith" required>
                     </div>
                     <div class="form-group">
-                        <label for="sand-handicap">Stated Handicap Index</label>
-                        <input type="number" id="sand-handicap" step="0.1" value="15.0" min="-10" max="54" required>
+                        <label for="sand-handicap">
+                            Stated Handicap Index
+                            <span class="form-help" data-tooltip="Their official USGA handicap index. Ask them or check the tournament sheet.">?</span>
+                        </label>
+                        <input type="number" id="sand-handicap" step="0.1" placeholder="e.g., 12.4" min="-10" max="54" required>
                     </div>
                 </div>
             </div>
 
             <div class="form-section">
                 <h3>⛳ Course Information</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 15px;">
+                    💡 <strong>Tip:</strong> Check the scorecard or ask the pro shop. Default values work for most courses.
+                </p>
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="sand-course-name">Course Name</label>
-                        <input type="text" id="sand-course-name" value="Tournament Course" required>
+                        <label for="sand-course-name">
+                            Course Name
+                        </label>
+                        <input type="text" id="sand-course-name" placeholder="e.g., Pinehurst #2" required>
                     </div>
                     <div class="form-group">
-                        <label for="sand-tee-name">Tee</label>
+                        <label for="sand-tee-name">Tee Color</label>
                         <input type="text" id="sand-tee-name" value="White" required>
                     </div>
                     <div class="form-group">
-                        <label for="sand-par">Par</label>
+                        <label for="sand-par">
+                            Par
+                            <span class="form-help" data-tooltip="Total par for the course (usually 70-72)">?</span>
+                        </label>
                         <input type="number" id="sand-par" value="72" min="27" max="80" required>
                     </div>
                     <div class="form-group">
-                        <label for="sand-course-rating">Course Rating</label>
-                        <input type="number" id="sand-course-rating" step="0.1" value="72.5" min="50" max="90" required>
+                        <label for="sand-course-rating">
+                            Course Rating
+                            <span class="form-help" data-tooltip="Found on scorecard. Typically 68-75. Measures difficulty for scratch golfers.">?</span>
+                        </label>
+                        <input type="number" id="sand-course-rating" step="0.1" value="72.0" min="50" max="90" required>
                     </div>
                     <div class="form-group">
-                        <label for="sand-slope-rating">Slope Rating</label>
-                        <input type="number" id="sand-slope-rating" value="130" min="55" max="155" required>
+                        <label for="sand-slope-rating">
+                            Slope Rating
+                            <span class="form-help" data-tooltip="Found on scorecard. Usually 113-140. Higher = harder for high handicappers.">?</span>
+                        </label>
+                        <input type="number" id="sand-slope-rating" value="125" min="55" max="155" required>
                     </div>
                 </div>
             </div>
 
             <div class="form-section">
-                <h3>🏆 Tournament/Competitive Scores</h3>
+                <h3>🏆 Tournament Scores</h3>
                 <p style="color: var(--text-secondary); margin-bottom: 15px;">
-                    Enter scores from competitive rounds (tournaments, matches, member-guest, etc.). These are analyzed for suspicious patterns.
+                    <strong>Enter what they shot today</strong> and any other tournament rounds you know about.<br>
+                    More data = better analysis, but even one round can reveal patterns.
                 </p>
                 <div id="tournament-scores-container">
                     <div class="score-entry" data-round="1">
                         <div class="form-grid">
                             <div class="form-group">
-                                <label>Tournament Round 1</label>
-                                <input type="number" class="tournament-score-input" min="25" max="200" required>
+                                <label>Today's Score</label>
+                                <input type="number" class="tournament-score-input" placeholder="e.g., 78" min="25" max="200" required>
                             </div>
                             <div class="form-group">
                                 <label>Holes</label>
@@ -4617,6 +4974,15 @@
 
         <div id="sandbagging-results" class="results-section" style="display: none;">
             <h3 id="sand-results-title">🧨 Spackler Analysis Results</h3>
+            
+            <!-- 🆕 QUICK SUMMARY for First-Time Users -->
+            <div class="results-quick-summary" id="resultsQuickSummary">
+                <div class="summary-verdict" id="quickVerdict">Checking...</div>
+                <div class="summary-score" id="quickScore">--</div>
+                <div class="summary-explanation" id="quickExplanation">
+                    Analyzing the data...
+                </div>
+            </div>
             
             <!-- 📖 THE NARRATION - Carl's story of this player -->
             <div class="carl-narration caddyshack-only" id="carl-narration">
@@ -4720,6 +5086,11 @@
                     <p class="no-flags">✅ No red flags detected</p>
                 </div>
             </div>
+            
+            <!-- 🆕 CHECK ANOTHER PLAYER Button -->
+            <button type="button" class="check-another-btn" onclick="checkAnotherPlayer()">
+                🔍 Check Another Player
+            </button>
         </div>
 
         <div class="error-message" id="sandbagging-error" style="display: none;"></div>
@@ -6898,6 +7269,102 @@
             updateWatchlistPanel();
             updateHistoryPanel();
             updateStatsPanel();
+            checkFirstTimeUser();
+        }
+        
+        // 🆕 FIRST-TIME USER EXPERIENCE
+        function checkFirstTimeUser() {
+            const hasSeenWelcome = localStorage.getItem('spackler_seen_welcome');
+            if (!hasSeenWelcome) {
+                // Show welcome modal after splash screen dismisses
+                setTimeout(() => {
+                    const welcomeModal = document.getElementById('welcomeModal');
+                    if (welcomeModal) {
+                        welcomeModal.classList.add('show');
+                    }
+                }, 500);
+            }
+        }
+        
+        function dismissWelcome() {
+            localStorage.setItem('spackler_seen_welcome', 'true');
+            const welcomeModal = document.getElementById('welcomeModal');
+            if (welcomeModal) {
+                welcomeModal.classList.remove('show');
+            }
+        }
+        
+        function startQuickCheck() {
+            dismissWelcome();
+            // Navigate to the Suspects tab
+            showTab('sandbagging');
+            // Scroll to form
+            setTimeout(() => {
+                const form = document.getElementById('sandbagging-form');
+                if (form) {
+                    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 300);
+        }
+        
+        // Check Another Player - reset form and scroll to top
+        function checkAnotherPlayer() {
+            // Hide results
+            document.getElementById('sandbagging-results').style.display = 'none';
+            
+            // Reset name field
+            document.getElementById('sand-name').value = '';
+            document.getElementById('sand-name').focus();
+            
+            // Scroll back to form
+            document.getElementById('sandbagging-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // Show encouraging gopher quip
+            showGopherQuip("Fresh suspect? Let's get 'em. Enter their info.");
+        }
+        
+        // Update quick summary based on results
+        function updateQuickSummary(data) {
+            const summary = document.getElementById('resultsQuickSummary');
+            const verdict = document.getElementById('quickVerdict');
+            const score = document.getElementById('quickScore');
+            const explanation = document.getElementById('quickExplanation');
+            
+            const riskScore = data.sandbagging_risk_score;
+            score.textContent = riskScore.toFixed(0) + '/100';
+            
+            // Remove all verdict classes
+            summary.classList.remove('verdict-clean', 'verdict-suspicious', 'verdict-likely');
+            
+            if (riskScore < 25) {
+                summary.classList.add('verdict-clean');
+                verdict.textContent = '✅ Looks Legit';
+                explanation.innerHTML = `
+                    <strong>Good news!</strong> Their scores are consistent with their stated handicap.<br>
+                    No unusual patterns detected. Play on!
+                `;
+            } else if (riskScore < 50) {
+                summary.classList.add('verdict-suspicious');
+                verdict.textContent = '🤔 Slightly Unusual';
+                explanation.innerHTML = `
+                    <strong>A few things look off</strong>, but could be explained by a hot streak.<br>
+                    Worth keeping an eye on. Check the red flags below.
+                `;
+            } else if (riskScore < 75) {
+                summary.classList.add('verdict-suspicious');
+                verdict.textContent = '⚠️ Suspicious Patterns';
+                explanation.innerHTML = `
+                    <strong>Multiple red flags detected.</strong> Their performance significantly exceeds what their handicap suggests.<br>
+                    You might want to bring this to the tournament committee's attention.
+                `;
+            } else {
+                summary.classList.add('verdict-likely');
+                verdict.textContent = '🚨 High Likelihood of Sandbagging';
+                explanation.innerHTML = `
+                    <strong>Strong evidence of handicap manipulation.</strong> Statistically, these scores are nearly impossible for someone with their stated handicap.<br>
+                    Consider discussing with tournament officials.
+                `;
+            }
         }
         
         // Carl's random tips for the tip banner
@@ -7671,6 +8138,9 @@
                 if (!response.ok) throw new Error('Failed to analyze for sandbagging');
                 const data = await response.json();
 
+                // 🆕 Update quick summary for first-time users
+                updateQuickSummary(data);
+                
                 // Update suspicion gauge
                 updateGauge(data.sandbagging_risk_score);
 
