@@ -3622,12 +3622,60 @@
                 top: auto;
                 bottom: 70px;
                 right: 10px;
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
             }
             
             /* Sound toggle repositioning */
             .sound-toggle {
                 bottom: 70px;
                 left: 10px;
+            }
+            
+            /* Stack the Caddyshack feature toggles vertically on mobile */
+            .watchlist-toggle,
+            .history-toggle,
+            .stats-toggle {
+                right: 10px;
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+            
+            .watchlist-toggle {
+                bottom: 120px;
+            }
+            
+            .history-toggle {
+                bottom: 170px;
+            }
+            
+            .stats-toggle {
+                bottom: 220px;
+            }
+            
+            /* Make panels full-width on mobile */
+            .watchlist-panel,
+            .history-panel {
+                width: 100%;
+                right: -100%;
+                border-radius: 0;
+            }
+            
+            .stats-panel {
+                width: 95%;
+                max-width: none;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                padding: 15px;
+            }
+            
+            .stat-box .stat-number {
+                font-size: 1.4rem;
             }
             
             /* Simplified header */
@@ -4832,6 +4880,18 @@
                 <div class="shortcut-item">
                     <kbd>?</kbd>
                     <span>Show this help</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>📋 Button</kbd>
+                    <span>Noonan Watchlist</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>📜 Button</kbd>
+                    <span>Analysis History</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>📊 Button</kbd>
+                    <span>Stats Dashboard</span>
                 </div>
                 <div class="shortcut-item">
                     <kbd>↑↑↓↓←→←→BA</kbd>
