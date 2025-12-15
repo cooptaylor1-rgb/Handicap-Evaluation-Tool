@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Spackler">
     <meta name="format-detection" content="telephone=no">
@@ -16,6 +17,7 @@
     
     <!-- App Icons -->
     <link rel="apple-touch-icon" href="/static/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="192x192" href="/static/images/icon-192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/static/images/icon-512.png">
     
@@ -739,6 +741,77 @@
         
         body.serious-mode .carl-tip {
             display: none;
+        }
+
+        /* iPhone Add-to-Home CTA */
+        .mobile-cta {
+            display: none;
+            background: linear-gradient(135deg, rgba(232, 213, 100, 0.18), rgba(44, 71, 47, 0.16));
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            margin: 16px 0;
+            box-shadow: var(--shadow-md);
+        }
+
+        .mobile-cta.visible {
+            display: block;
+        }
+
+        .mobile-cta-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 6px;
+        }
+
+        .mobile-cta-body {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .mobile-cta-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .mobile-cta-actions button {
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background: #fffaf0;
+            color: var(--text-primary);
+            padding: 8px 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .mobile-cta-actions button.primary {
+            background: var(--bushwood-green);
+            color: #fff;
+            border-color: var(--bushwood-green);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .mobile-cta-actions button:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .mobile-cta-steps {
+            margin: 10px 0 0;
+            padding-left: 18px;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            display: none;
+        }
+
+        .mobile-cta-steps.visible {
+            display: block;
         }
 
         /* ============================================
@@ -3659,9 +3732,17 @@
                 font-size: 0.85rem;
                 margin-bottom: 0;
             }
-            
+
             .header-tagline {
                 display: none;
+            }
+
+            .mobile-cta {
+                margin: 12px 0;
+            }
+
+            .mobile-cta-actions {
+                flex-direction: column;
             }
             
             /* Mode toggle - inline with header */
@@ -4388,7 +4469,23 @@
             <span class="tip-text" id="carl-tip-text">Loading wisdom from the Himalayas...</span>
             <button class="tip-refresh" onclick="refreshCarlTip()" title="Get new tip">🔄</button>
         </div>
-        
+
+        <div class="mobile-cta" id="ios-home-screen">
+            <div class="mobile-cta-title">📱 Add Spackler to your iPhone</div>
+            <div class="mobile-cta-body">
+                Get the full-screen, app-like experience and quick launches from your Home Screen.
+            </div>
+            <div class="mobile-cta-actions">
+                <button class="primary" onclick="acknowledgeIosCta()">Got it</button>
+                <button onclick="toggleIosSteps()" id="ios-cta-steps-toggle">Show steps</button>
+            </div>
+            <ol class="mobile-cta-steps" id="ios-cta-steps">
+                <li>Tap the <strong>Share</strong> button in Safari.</li>
+                <li>Select <strong>Add to Home Screen</strong>.</li>
+                <li>Tap <strong>Add</strong> to pin Spackler like a native app.</li>
+            </ol>
+        </div>
+
         <div class="tabs">
             <button class="tab active" onclick="showTab('sandbagging')" id="suspectsTab">🔍 Check Opponent</button>
             <button class="tab" onclick="showTab('individual')">Single Round</button>
@@ -7607,6 +7704,79 @@
             return prob >= 0.2 ? 'prob-high' : 'prob-low';
         }
 
+        const IOS_CTA_KEY = 'spackler_ios_cta_dismissed';
+
+        function isIosDevice() {
+            return /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
+        }
+
+        function isStandaloneMode() {
+            return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+        }
+
+        function setupIosCta() {
+            const banner = document.getElementById('ios-home-screen');
+            if (!banner) return;
+
+            const dismissed = localStorage.getItem(IOS_CTA_KEY) === 'true';
+            if (isIosDevice() && !isStandaloneMode() && !dismissed) {
+                banner.classList.add('visible');
+            } else {
+                banner.style.display = 'none';
+            }
+        }
+
+        function acknowledgeIosCta() {
+            const banner = document.getElementById('ios-home-screen');
+            localStorage.setItem(IOS_CTA_KEY, 'true');
+            if (banner) {
+                banner.classList.remove('visible');
+            }
+        }
+
+        function toggleIosSteps() {
+            const steps = document.getElementById('ios-cta-steps');
+            const toggle = document.getElementById('ios-cta-steps-toggle');
+            if (!steps) return;
+
+            steps.classList.toggle('visible');
+            if (toggle) {
+                toggle.textContent = steps.classList.contains('visible') ? 'Hide steps' : 'Show steps';
+            }
+        }
+
+        let inputModeObserver = null;
+
+        function applyInputModeAttributes(input) {
+            if (!input || input.dataset.inputmodeSet === 'true') return;
+            const stepValue = input.getAttribute('step') || '';
+            const prefersDecimal = stepValue.includes('.');
+            input.setAttribute('inputmode', prefersDecimal ? 'decimal' : 'numeric');
+            input.setAttribute('enterkeyhint', 'done');
+            input.dataset.inputmodeSet = 'true';
+        }
+
+        function enhanceMobileInputs() {
+            document.querySelectorAll('input[type="number"]').forEach(applyInputModeAttributes);
+
+            if (inputModeObserver) return;
+
+            inputModeObserver = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    mutation.addedNodes.forEach(node => {
+                        if (!(node instanceof HTMLElement)) return;
+                        if (node.matches && node.matches('input[type="number"]')) {
+                            applyInputModeAttributes(node);
+                        }
+                        const descendants = node.querySelectorAll ? node.querySelectorAll('input[type="number"]') : [];
+                        descendants.forEach(applyInputModeAttributes);
+                    });
+                });
+            });
+
+            inputModeObserver.observe(document.body, { childList: true, subtree: true });
+        }
+
         // LocalStorage functions for form persistence
         function saveFormData(formName, data) {
             try {
@@ -7662,6 +7832,8 @@
         window.addEventListener('DOMContentLoaded', () => {
             applyMode(currentMode);  // Apply saved theme mode
             loadSavedFormData();     // Load saved form data
+            setupIosCta();           // Prompt iPhone users to pin the app
+            enhanceMobileInputs();   // Show numeric/decimal keyboards on iOS
         });
 
         // Individual Player Form
