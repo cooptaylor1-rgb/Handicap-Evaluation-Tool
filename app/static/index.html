@@ -2,10 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Spackler">
+    <meta name="format-detection" content="telephone=no">
     <meta name="theme-color" content="#2C472F">
     <meta name="description" content="Quick sandbagger detection for golf tournaments and member-guests. Check if your opponents' handicaps are legit.">
     <title>🏌️ Spackler's Handicap Checker</title>
@@ -102,7 +103,25 @@
             color: var(--text-primary);
             line-height: 1.6;
             min-height: 100vh;
+            min-height: 100dvh;
             position: relative;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        html {
+            height: 100%;
+        }
+
+        /* iOS Safari: avoid 100vh address-bar issues */
+        @supports (-webkit-touch-callout: none) {
+            body {
+                min-height: -webkit-fill-available;
+            }
+        }
+
+        /* Prevent iOS from zooming inputs on focus */
+        input, select, textarea {
+            font-size: 16px;
         }
         
         /* ============================================
@@ -168,7 +187,7 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: calc(20px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));
             position: relative;
             z-index: 1;
         }
@@ -4404,6 +4423,10 @@
                             <div class="label">Z-Score</div>
                             <div class="value" id="z-score">--</div>
                         </div>
+                        <div class="detail-item">
+                            <div class="label">Odds (1 in)</div>
+                            <div class="value" id="single-odds">--</div>
+                        </div>
                     </div>
                 </div>
 
@@ -4420,6 +4443,10 @@
                         <div class="detail-item">
                             <div class="label">Rounds</div>
                             <div class="value" id="num-rounds-display">--</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Odds (At least once)</div>
+                            <div class="value" id="multi-odds">--</div>
                         </div>
                     </div>
                 </div>
@@ -4550,6 +4577,10 @@
                         <div class="detail-item">
                             <div class="label">Target Net Score</div>
                             <div class="value" id="team-target-display">--</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Odds (1 in)</div>
+                            <div class="value" id="team-single-odds">--</div>
                         </div>
                     </div>
                 </div>
@@ -4825,6 +4856,10 @@
                         <div class="detail-item">
                             <div class="label">Overall Probability</div>
                             <div class="value prob-high" id="comp-overall-prob">--</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Odds (1 in)</div>
+                            <div class="value" id="comp-overall-odds">--</div>
                         </div>
                     </div>
                 </div>
@@ -5102,6 +5137,10 @@
                     <div class="detail-item">
                         <div class="label">Joint Probability</div>
                         <div class="value" id="sand-joint-prob">--</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="label">Odds (1 in)</div>
+                        <div class="value" id="sand-joint-odds">--</div>
                     </div>
                     <div class="detail-item" id="casual-comparison" style="display: none;">
                         <div class="label">Casual vs Tournament</div>
@@ -7474,6 +7513,22 @@
             return (value * 100).toFixed(1) + '%';
         }
 
+        function formatOneIn(value) {
+            if (value === null || value === undefined) return '--';
+            if (typeof value !== 'number') return '--';
+            if (value <= 0) return '--';
+            if (value >= 1) return '1 in 1';
+            const denom = Math.ceil(1 / value);
+            if (!Number.isFinite(denom) || denom < 1) return '--';
+            return '1 in ' + denom.toLocaleString();
+        }
+
+        function formatPercentWithOdds(probability, oddsText) {
+            const pct = formatPercent(probability);
+            const odds = oddsText || formatOneIn(probability);
+            return odds && odds !== '--' ? `${pct} (${odds})` : pct;
+        }
+
         function getProbClass(prob) {
             return prob >= 0.2 ? 'prob-high' : 'prob-low';
         }
@@ -7639,10 +7694,24 @@
                 document.getElementById('score-std').textContent = '±' + singleData.score_std.toFixed(1);
                 document.getElementById('target-display').textContent = singleData.target_score;
                 document.getElementById('z-score').textContent = singleData.z_score ? singleData.z_score.toFixed(2) : '--';
+                const singleOddsEl = document.getElementById('single-odds');
+                if (singleOddsEl) {
+                    singleOddsEl.textContent = singleData.one_in_chance_score_at_or_below_target_text ||
+                        (typeof singleData.one_in_chance_score_at_or_below_target === 'number'
+                            ? ('1 in ' + Math.round(singleData.one_in_chance_score_at_or_below_target).toLocaleString())
+                            : formatOneIn(singleData.probability_score_at_or_below_target));
+                }
 
                 document.getElementById('multi-prob').textContent = formatPercent(multiData.probability_at_least_once);
                 document.getElementById('prob-at-least-once').textContent = formatPercent(multiData.probability_at_least_once);
                 document.getElementById('num-rounds-display').textContent = multiData.num_rounds;
+                const multiOddsEl = document.getElementById('multi-odds');
+                if (multiOddsEl) {
+                    multiOddsEl.textContent = multiData.one_in_chance_probability_at_least_once_text ||
+                        (typeof multiData.one_in_chance_probability_at_least_once === 'number'
+                            ? ('1 in ' + Math.round(multiData.one_in_chance_probability_at_least_once).toLocaleString())
+                            : formatOneIn(multiData.probability_at_least_once));
+                }
 
                 // Milestones table
                 const milestonesBody = document.getElementById('milestones-body');
@@ -7651,8 +7720,8 @@
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td><strong>${milestone.target_score}</strong></td>
-                        <td class="${getProbClass(milestone.prob_single_round_at_or_below)}">${formatPercent(milestone.prob_single_round_at_or_below)}</td>
-                        <td class="${getProbClass(milestone.prob_at_least_once_in_event)}">${formatPercent(milestone.prob_at_least_once_in_event)}</td>
+                        <td class="${getProbClass(milestone.prob_single_round_at_or_below)}">${formatPercentWithOdds(milestone.prob_single_round_at_or_below, milestone.one_in_chance_single_round_text)}</td>
+                        <td class="${getProbClass(milestone.prob_at_least_once_in_event)}">${formatPercentWithOdds(milestone.prob_at_least_once_in_event, milestone.one_in_chance_at_least_once_in_event_text)}</td>
                     `;
                     milestonesBody.appendChild(row);
                 });
@@ -7726,10 +7795,23 @@
                 document.getElementById('team-expected-bb').textContent = data.expected_team_bestball_score_single_round.toFixed(1);
                 document.getElementById('team-std-bb').textContent = '±' + data.std_team_bestball_score_single_round.toFixed(1);
                 document.getElementById('team-target-display').textContent = data.target_net_score;
+                const teamSingleOddsEl = document.getElementById('team-single-odds');
+                if (teamSingleOddsEl) {
+                    teamSingleOddsEl.textContent = data.one_in_chance_probability_net_bestball_at_or_below_target_single_round_text ||
+                        (typeof data.one_in_chance_probability_net_bestball_at_or_below_target_single_round === 'number'
+                            ? ('1 in ' + Math.round(data.one_in_chance_probability_net_bestball_at_or_below_target_single_round).toLocaleString())
+                            : formatOneIn(data.probability_net_bestball_at_or_below_target_single_round));
+                }
                 
                 document.getElementById('team-multi-prob').textContent = formatPercent(data.probability_at_least_once_in_event);
-                document.getElementById('team-prob-at-least-once').textContent = formatPercent(data.probability_at_least_once_in_event);
-                document.getElementById('team-prob-at-least-n').textContent = formatPercent(data.probability_at_least_min_success_rounds);
+                document.getElementById('team-prob-at-least-once').textContent = formatPercentWithOdds(
+                    data.probability_at_least_once_in_event,
+                    data.one_in_chance_probability_at_least_once_in_event_text
+                );
+                document.getElementById('team-prob-at-least-n').textContent = formatPercentWithOdds(
+                    data.probability_at_least_min_success_rounds,
+                    data.one_in_chance_probability_at_least_min_success_rounds_text
+                );
                 document.getElementById('team-simulations').textContent = data.num_simulations_used.toLocaleString();
 
                 // Summary text
@@ -7737,7 +7819,8 @@
                 const multiProb = (data.probability_at_least_once_in_event * 100).toFixed(0);
                 document.getElementById('team-summary').innerHTML = `
                     Your team has a <strong>${singleProb}%</strong> chance of firing net ${data.target_net_score} or better 
-                    in any one round, and a <strong>${multiProb}%</strong> chance of doing it at least once 
+                    in any one round (${data.one_in_chance_probability_net_bestball_at_or_below_target_single_round_text || formatOneIn(data.probability_net_bestball_at_or_below_target_single_round)}), and a <strong>${multiProb}%</strong> chance of doing it at least once 
+                    (${data.one_in_chance_probability_at_least_once_in_event_text || formatOneIn(data.probability_at_least_once_in_event)})
                     over ${data.num_rounds} rounds.
                 `;
                 
@@ -7836,12 +7919,18 @@
                 
                 document.getElementById('cons-all-prob').textContent = formatPercent(data.probability_all_consecutive);
                 document.getElementById('cons-count-display').textContent = data.consecutive_count;
-                document.getElementById('cons-all-display').textContent = formatPercent(data.probability_all_consecutive);
+                document.getElementById('cons-all-display').textContent = formatPercentWithOdds(
+                    data.probability_all_consecutive,
+                    data.one_in_chance_probability_all_consecutive_text
+                );
                 
                 // Show streak probability if total_matches was specified
                 if (data.probability_streak_in_matches !== null) {
                     document.getElementById('streak-container').style.display = 'block';
-                    document.getElementById('cons-streak-display').textContent = formatPercent(data.probability_streak_in_matches);
+                    document.getElementById('cons-streak-display').textContent = formatPercentWithOdds(
+                        data.probability_streak_in_matches,
+                        data.one_in_chance_probability_streak_in_matches_text
+                    );
                 } else {
                     document.getElementById('streak-container').style.display = 'none';
                 }
@@ -7850,14 +7939,14 @@
                 const singleProb = (data.single_round_probability * 100).toFixed(1);
                 const allProb = (data.probability_all_consecutive * 100).toFixed(2);
                 let summaryText = `
-                    You have a <strong>${singleProb}%</strong> chance of shooting ${data.target_score} or better 
-                    in a single ${data.holes_per_round}-hole round, and a <strong>${allProb}%</strong> chance 
+                    You have a <strong>${singleProb}%</strong> chance (${data.one_in_chance_single_round_probability_text || formatOneIn(data.single_round_probability)}) of shooting ${data.target_score} or better 
+                    in a single ${data.holes_per_round}-hole round, and a <strong>${allProb}%</strong> chance (${data.one_in_chance_probability_all_consecutive_text || formatOneIn(data.probability_all_consecutive)}) 
                     of doing it ${data.consecutive_count} times in a row.
                 `;
                 
                 if (data.probability_streak_in_matches !== null) {
                     const streakProb = (data.probability_streak_in_matches * 100).toFixed(2);
-                    summaryText += `<br><br>Over ${data.total_matches} total matches, there's a <strong>${streakProb}%</strong> 
+                    summaryText += `<br><br>Over ${data.total_matches} total matches, there's a <strong>${streakProb}%</strong> (${data.one_in_chance_probability_streak_in_matches_text || formatOneIn(data.probability_streak_in_matches)}) 
                     chance of having at least one streak of ${data.consecutive_count} consecutive scores at or below ${data.target_score}.`;
                 }
                 
@@ -7979,6 +8068,13 @@
                     `<span style="color: ${diffColor}; font-weight: bold;">${diffSign}${data.total_strokes_from_expected.toFixed(1)}</span>`;
                 
                 document.getElementById('comp-overall-prob').textContent = formatPercent(data.overall_probability);
+                const overallOddsEl = document.getElementById('comp-overall-odds');
+                if (overallOddsEl) {
+                    overallOddsEl.textContent = data.one_in_chance_overall_probability_text ||
+                        (typeof data.one_in_chance_overall_probability === 'number'
+                            ? ('1 in ' + Math.round(data.one_in_chance_overall_probability).toLocaleString())
+                            : formatOneIn(data.overall_probability));
+                }
                 document.getElementById('completed-overall-summary').innerHTML = 
                     `<strong>${data.overall_performance_descriptor}</strong>`;
 
@@ -8009,7 +8105,7 @@
                             </div>
                             <div class="detail-item">
                                 <div class="label">Probability</div>
-                                <div class="value">${formatPercent(round.probability_at_or_below)}</div>
+                                <div class="value">${formatPercentWithOdds(round.probability_at_or_below, round.one_in_chance_probability_at_or_below_text)}</div>
                             </div>
                             <div class="detail-item">
                                 <div class="label">Percentile</div>
@@ -8026,10 +8122,10 @@
                 // Performance highlights
                 document.getElementById('comp-best-score').textContent = data.best_round.actual_score;
                 document.getElementById('comp-best-prob').textContent = 
-                    `${formatPercent(data.best_round.probability_at_or_below)} (Round ${data.best_round.round_number})`;
+                    `${formatPercentWithOdds(data.best_round.probability_at_or_below, data.best_round.one_in_chance_probability_at_or_below_text)} (Round ${data.best_round.round_number})`;
                 document.getElementById('comp-worst-score').textContent = data.worst_round.actual_score;
                 document.getElementById('comp-worst-prob').textContent = 
-                    `${formatPercent(data.worst_round.probability_at_or_below)} (Round ${data.worst_round.round_number})`;
+                    `${formatPercentWithOdds(data.worst_round.probability_at_or_below, data.worst_round.one_in_chance_probability_at_or_below_text)} (Round ${data.worst_round.round_number})`;
 
                 loading.classList.remove('active');
                 results.style.display = 'block';
@@ -8218,6 +8314,22 @@
                     `${data.score_volatility.toFixed(1)} (${data.volatility_vs_expected})`;
                 document.getElementById('sand-joint-prob').textContent = 
                     (data.probability_all_tournament_scores * 100).toFixed(4) + '%';
+
+                const oddsEl = document.getElementById('sand-joint-odds');
+                if (oddsEl) {
+                    if (data.one_in_chance_all_tournament_scores_text) {
+                        oddsEl.textContent = data.one_in_chance_all_tournament_scores_text;
+                    } else if (typeof data.one_in_chance_all_tournament_scores === 'number') {
+                        oddsEl.textContent = '1 in ' + Math.round(data.one_in_chance_all_tournament_scores).toLocaleString();
+                    } else if (data.probability_all_tournament_scores > 0) {
+                        const approx = 1 / data.probability_all_tournament_scores;
+                        oddsEl.textContent = Number.isFinite(approx)
+                            ? ('1 in ' + Math.round(approx).toLocaleString())
+                            : '--';
+                    } else {
+                        oddsEl.textContent = '--';
+                    }
+                }
                 
                 // Casual comparison (if available)
                 if (data.has_casual_comparison) {

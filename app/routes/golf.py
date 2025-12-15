@@ -6,6 +6,7 @@ multi-round, and milestone probabilities for individual golfers.
 """
 
 import logging
+import math
 from fastapi import APIRouter
 
 from app.models import (
@@ -54,6 +55,20 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+def _prob_to_one_in_denominator(probability: float) -> int | None:
+    if probability <= 0.0:
+        return None
+    if probability >= 1.0:
+        return 1
+    denom = math.ceil(1.0 / probability)
+    return int(denom) if denom >= 1 else 1
+
+
+def _prob_to_one_in_text(probability: float) -> str | None:
+    denom = _prob_to_one_in_denominator(probability)
+    return f"1 in {denom:,}" if denom is not None else None
+
+
 @router.post(
     "/probability/single-round",
     response_model=SingleRoundProbabilityResponse,
@@ -97,6 +112,9 @@ async def calculate_single_round_probability(
         sigma,
         request.target.target_score
     )
+
+    one_in = _prob_to_one_in_denominator(probability)
+    one_in_text = _prob_to_one_in_text(probability)
     
     logger.info(
         f"Result: expected={expected_score:.1f}, sigma={sigma:.1f}, "
@@ -108,6 +126,8 @@ async def calculate_single_round_probability(
         score_std=round(sigma, 2),
         target_score=request.target.target_score,
         probability_score_at_or_below_target=round(probability, 6),
+        one_in_chance_score_at_or_below_target=one_in,
+        one_in_chance_score_at_or_below_target_text=one_in_text,
         distribution_type="normal_approximation",
         z_score=round(z_score, 4)
     )
@@ -168,6 +188,13 @@ async def calculate_multi_round_probability(
         single_prob,
         request.min_success_rounds
     )
+
+    single_one_in = _prob_to_one_in_denominator(single_prob)
+    single_one_in_text = _prob_to_one_in_text(single_prob)
+    once_one_in = _prob_to_one_in_denominator(prob_at_least_once)
+    once_one_in_text = _prob_to_one_in_text(prob_at_least_once)
+    min_one_in = _prob_to_one_in_denominator(prob_at_least_min)
+    min_one_in_text = _prob_to_one_in_text(prob_at_least_min)
     
     logger.info(
         f"Result: single_prob={single_prob:.4f}, "
@@ -184,6 +211,12 @@ async def calculate_multi_round_probability(
         probability_at_least_min_success_rounds=round(prob_at_least_min, 6),
         probability_at_least_once=round(prob_at_least_once, 6),
         single_round_probability=round(single_prob, 6),
+        one_in_chance_single_round_probability=single_one_in,
+        one_in_chance_single_round_probability_text=single_one_in_text,
+        one_in_chance_probability_at_least_once=once_one_in,
+        one_in_chance_probability_at_least_once_text=once_one_in_text,
+        one_in_chance_probability_at_least_min_success_rounds=min_one_in,
+        one_in_chance_probability_at_least_min_success_rounds_text=min_one_in_text,
         binomial_model_used=True
     )
 
@@ -240,11 +273,20 @@ async def calculate_milestone_probabilities(
             single_prob,
             request.event.num_rounds
         )
+
+        single_one_in = _prob_to_one_in_denominator(single_prob)
+        single_one_in_text = _prob_to_one_in_text(single_prob)
+        multi_one_in = _prob_to_one_in_denominator(multi_prob)
+        multi_one_in_text = _prob_to_one_in_text(multi_prob)
         
         milestones.append(MilestoneResult(
             target_score=target,
             prob_single_round_at_or_below=round(single_prob, 6),
-            prob_at_least_once_in_event=round(multi_prob, 6)
+            prob_at_least_once_in_event=round(multi_prob, 6),
+            one_in_chance_single_round=single_one_in,
+            one_in_chance_single_round_text=single_one_in_text,
+            one_in_chance_at_least_once_in_event=multi_one_in,
+            one_in_chance_at_least_once_in_event_text=multi_one_in_text
         ))
     
     logger.info(f"Calculated {len(milestones)} milestone probabilities")
@@ -317,6 +359,19 @@ async def calculate_consecutive_scores_probability(
             request.consecutive_count,
             request.total_matches
         )
+
+    single_one_in = _prob_to_one_in_denominator(single_prob)
+    single_one_in_text = _prob_to_one_in_text(single_prob)
+    all_one_in = _prob_to_one_in_denominator(prob_all_consecutive)
+    all_one_in_text = _prob_to_one_in_text(prob_all_consecutive)
+    streak_one_in = (
+        _prob_to_one_in_denominator(prob_streak_in_matches)
+        if prob_streak_in_matches is not None else None
+    )
+    streak_one_in_text = (
+        _prob_to_one_in_text(prob_streak_in_matches)
+        if prob_streak_in_matches is not None else None
+    )
     
     logger.info(
         f"Result: expected={expected_score:.1f}, single_prob={single_prob:.4f}, "
@@ -332,7 +387,13 @@ async def calculate_consecutive_scores_probability(
         single_round_probability=round(single_prob, 6),
         probability_all_consecutive=round(prob_all_consecutive, 6),
         total_matches=request.total_matches,
-        probability_streak_in_matches=round(prob_streak_in_matches, 6) if prob_streak_in_matches is not None else None
+        probability_streak_in_matches=round(prob_streak_in_matches, 6) if prob_streak_in_matches is not None else None,
+        one_in_chance_single_round_probability=single_one_in,
+        one_in_chance_single_round_probability_text=single_one_in_text,
+        one_in_chance_probability_all_consecutive=all_one_in,
+        one_in_chance_probability_all_consecutive_text=all_one_in_text,
+        one_in_chance_probability_streak_in_matches=streak_one_in,
+        one_in_chance_probability_streak_in_matches_text=streak_one_in_text
     )
 
 
@@ -410,6 +471,8 @@ async def analyze_completed_rounds(
             strokes_from_expected=round(strokes_from_expected, 2),
             z_score=round(z_score, 4),
             probability_at_or_below=round(prob_at_or_below, 6),
+            one_in_chance_probability_at_or_below=_prob_to_one_in_denominator(prob_at_or_below),
+            one_in_chance_probability_at_or_below_text=_prob_to_one_in_text(prob_at_or_below),
             percentile=round(percentile, 2),
             performance_descriptor=descriptor
         ))
@@ -431,6 +494,9 @@ async def analyze_completed_rounds(
     overall_probability = compute_joint_probability_independent_rounds(
         individual_probabilities
     )
+
+    overall_one_in = _prob_to_one_in_denominator(overall_probability)
+    overall_one_in_text = _prob_to_one_in_text(overall_probability)
     
     # Get overall performance descriptor
     overall_descriptor = get_overall_performance_descriptor(
@@ -458,6 +524,8 @@ async def analyze_completed_rounds(
         average_actual_score=round(average_actual_score, 2),
         total_strokes_from_expected=round(total_strokes_from_expected, 2),
         overall_probability=round(overall_probability, 6),
+        one_in_chance_overall_probability=overall_one_in,
+        one_in_chance_overall_probability_text=overall_one_in_text,
         overall_performance_descriptor=overall_descriptor,
         best_round=best_round,
         worst_round=worst_round
@@ -547,6 +615,10 @@ async def analyze_sandbagging(
     
     # Joint probability of all tournament scores
     joint_prob = compute_joint_probability_independent_rounds(tournament_probabilities)
+
+    # Convert probability into a human-friendly "1 in N" odds (denominator)
+    one_in_chance = _prob_to_one_in_denominator(joint_prob)
+    one_in_text = _prob_to_one_in_text(joint_prob)
     
     # Detect red flags
     red_flags = []
@@ -665,6 +737,8 @@ async def analyze_sandbagging(
         has_casual_comparison=has_casual_comparison,
         casual_vs_tournament_diff=round(casual_vs_tournament_diff, 2) if casual_vs_tournament_diff else None,
         probability_all_tournament_scores=round(joint_prob, 8),
+        one_in_chance_all_tournament_scores=one_in_chance,
+        one_in_chance_all_tournament_scores_text=one_in_text,
         summary=summary,
         recommendation=recommendation
     )

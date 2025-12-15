@@ -7,6 +7,7 @@ member-guest tournament preparation.
 """
 
 import logging
+import math
 from fastapi import APIRouter
 
 from app.models import (
@@ -23,6 +24,20 @@ from app.services import (
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+
+def _prob_to_one_in_denominator(probability: float) -> int | None:
+    if probability <= 0.0:
+        return None
+    if probability >= 1.0:
+        return 1
+    denom = math.ceil(1.0 / probability)
+    return int(denom) if denom >= 1 else 1
+
+
+def _prob_to_one_in_text(probability: float) -> str | None:
+    denom = _prob_to_one_in_denominator(probability)
+    return f"1 in {denom:,}" if denom is not None else None
 
 
 @router.post(
@@ -76,6 +91,12 @@ async def calculate_team_bestball_single_round(
         ),
         probability_net_bestball_at_or_below_target_single_round=round(
             results["single_round_probability_at_or_below_target"], 6
+        ),
+        one_in_chance_probability_net_bestball_at_or_below_target_single_round=_prob_to_one_in_denominator(
+            results["single_round_probability_at_or_below_target"]
+        ),
+        one_in_chance_probability_net_bestball_at_or_below_target_single_round_text=_prob_to_one_in_text(
+            results["single_round_probability_at_or_below_target"]
         ),
         num_simulations_used=results["num_simulations_used"],
         approximation_notes=get_team_approximation_notes()
@@ -138,6 +159,24 @@ async def calculate_team_bestball_multi_round(
         ),
         probability_at_least_min_success_rounds=round(
             results["probability_at_least_min_success_rounds"], 6
+        ),
+        one_in_chance_probability_net_bestball_at_or_below_target_single_round=_prob_to_one_in_denominator(
+            results["single_round_probability_at_or_below_target"]
+        ),
+        one_in_chance_probability_net_bestball_at_or_below_target_single_round_text=_prob_to_one_in_text(
+            results["single_round_probability_at_or_below_target"]
+        ),
+        one_in_chance_probability_at_least_once_in_event=_prob_to_one_in_denominator(
+            results["probability_at_least_once_in_event"]
+        ),
+        one_in_chance_probability_at_least_once_in_event_text=_prob_to_one_in_text(
+            results["probability_at_least_once_in_event"]
+        ),
+        one_in_chance_probability_at_least_min_success_rounds=_prob_to_one_in_denominator(
+            results["probability_at_least_min_success_rounds"]
+        ),
+        one_in_chance_probability_at_least_min_success_rounds_text=_prob_to_one_in_text(
+            results["probability_at_least_min_success_rounds"]
         ),
         expected_team_bestball_score_single_round=round(
             results["expected_team_bestball_score_single_round"], 2

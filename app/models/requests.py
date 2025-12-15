@@ -42,6 +42,16 @@ class SingleRoundProbabilityResponse(BaseModel):
         ge=0.0,
         le=1.0
     )
+
+    one_in_chance_score_at_or_below_target: Optional[int] = Field(
+        None,
+        description="Odds denominator for probability_score_at_or_below_target (e.g., 2500 means ~1 in 2,500)",
+        ge=1
+    )
+    one_in_chance_score_at_or_below_target_text: Optional[str] = Field(
+        None,
+        description="Human-friendly odds string for probability_score_at_or_below_target (e.g., '1 in 2,500')"
+    )
     distribution_type: str = Field(
         default="normal_approximation", 
         description="Type of distribution used for calculation"
@@ -113,6 +123,34 @@ class MultiRoundProbabilityResponse(BaseModel):
         ge=0.0,
         le=1.0
     )
+
+    one_in_chance_single_round_probability: Optional[int] = Field(
+        None,
+        description="Odds denominator for single_round_probability",
+        ge=1
+    )
+    one_in_chance_single_round_probability_text: Optional[str] = Field(
+        None,
+        description="Human-friendly odds string for single_round_probability"
+    )
+    one_in_chance_probability_at_least_once: Optional[int] = Field(
+        None,
+        description="Odds denominator for probability_at_least_once",
+        ge=1
+    )
+    one_in_chance_probability_at_least_once_text: Optional[str] = Field(
+        None,
+        description="Human-friendly odds string for probability_at_least_once"
+    )
+    one_in_chance_probability_at_least_min_success_rounds: Optional[int] = Field(
+        None,
+        description="Odds denominator for probability_at_least_min_success_rounds",
+        ge=1
+    )
+    one_in_chance_probability_at_least_min_success_rounds_text: Optional[str] = Field(
+        None,
+        description="Human-friendly odds string for probability_at_least_min_success_rounds"
+    )
     binomial_model_used: bool = Field(
         default=True, 
         description="Whether binomial model was used for multi-round calculation"
@@ -136,6 +174,25 @@ class MilestoneResult(BaseModel):
         description="Probability of achieving this score at least once in the event",
         ge=0.0,
         le=1.0
+    )
+
+    one_in_chance_single_round: Optional[int] = Field(
+        None,
+        description="Odds denominator for prob_single_round_at_or_below",
+        ge=1
+    )
+    one_in_chance_single_round_text: Optional[str] = Field(
+        None,
+        description="Human-friendly odds string for prob_single_round_at_or_below"
+    )
+    one_in_chance_at_least_once_in_event: Optional[int] = Field(
+        None,
+        description="Odds denominator for prob_at_least_once_in_event",
+        ge=1
+    )
+    one_in_chance_at_least_once_in_event_text: Optional[str] = Field(
+        None,
+        description="Human-friendly odds string for prob_at_least_once_in_event"
     )
 
 
@@ -211,6 +268,16 @@ class TeamBestBallSingleRoundResponse(BaseModel):
         ge=0.0,
         le=1.0
     )
+
+    one_in_chance_probability_net_bestball_at_or_below_target_single_round: Optional[int] = Field(
+        None,
+        description="Odds denominator for probability_net_bestball_at_or_below_target_single_round",
+        ge=1
+    )
+    one_in_chance_probability_net_bestball_at_or_below_target_single_round_text: Optional[str] = Field(
+        None,
+        description="Human-friendly odds string for probability_net_bestball_at_or_below_target_single_round"
+    )
     num_simulations_used: int = Field(
         ..., 
         description="Number of simulations used in calculation"
@@ -275,6 +342,34 @@ class TeamBestBallMultiRoundResponse(BaseModel):
         description="Probability of achieving target in at least min_success_rounds",
         ge=0.0,
         le=1.0
+    )
+
+    one_in_chance_probability_net_bestball_at_or_below_target_single_round: Optional[int] = Field(
+        None,
+        description="Odds denominator for probability_net_bestball_at_or_below_target_single_round",
+        ge=1
+    )
+    one_in_chance_probability_net_bestball_at_or_below_target_single_round_text: Optional[str] = Field(
+        None,
+        description="Human-friendly odds string for probability_net_bestball_at_or_below_target_single_round"
+    )
+    one_in_chance_probability_at_least_once_in_event: Optional[int] = Field(
+        None,
+        description="Odds denominator for probability_at_least_once_in_event",
+        ge=1
+    )
+    one_in_chance_probability_at_least_once_in_event_text: Optional[str] = Field(
+        None,
+        description="Human-friendly odds string for probability_at_least_once_in_event"
+    )
+    one_in_chance_probability_at_least_min_success_rounds: Optional[int] = Field(
+        None,
+        description="Odds denominator for probability_at_least_min_success_rounds",
+        ge=1
+    )
+    one_in_chance_probability_at_least_min_success_rounds_text: Optional[str] = Field(
+        None,
+        description="Human-friendly odds string for probability_at_least_min_success_rounds"
     )
     expected_team_bestball_score_single_round: float = Field(
         ..., 
@@ -366,6 +461,34 @@ class ConsecutiveScoresProbabilityResponse(BaseModel):
         le=1.0
     )
 
+    one_in_chance_single_round_probability: Optional[int] = Field(
+        None,
+        description="Odds denominator for single_round_probability",
+        ge=1
+    )
+    one_in_chance_single_round_probability_text: Optional[str] = Field(
+        None,
+        description="Human-friendly odds string for single_round_probability"
+    )
+    one_in_chance_probability_all_consecutive: Optional[int] = Field(
+        None,
+        description="Odds denominator for probability_all_consecutive",
+        ge=1
+    )
+    one_in_chance_probability_all_consecutive_text: Optional[str] = Field(
+        None,
+        description="Human-friendly odds string for probability_all_consecutive"
+    )
+    one_in_chance_probability_streak_in_matches: Optional[int] = Field(
+        None,
+        description="Odds denominator for probability_streak_in_matches",
+        ge=1
+    )
+    one_in_chance_probability_streak_in_matches_text: Optional[str] = Field(
+        None,
+        description="Human-friendly odds string for probability_streak_in_matches"
+    )
+
 
 # ============================================================================
 # Completed Round Score Analysis Models
@@ -441,6 +564,16 @@ class RoundProbabilityAnalysis(BaseModel):
         ge=0.0,
         le=1.0
     )
+
+    one_in_chance_probability_at_or_below: Optional[int] = Field(
+        None,
+        description="Odds denominator for probability_at_or_below",
+        ge=1
+    )
+    one_in_chance_probability_at_or_below_text: Optional[str] = Field(
+        None,
+        description="Human-friendly odds string for probability_at_or_below"
+    )
     percentile: float = Field(
         ...,
         description="Percentile ranking of this round (0-100)",
@@ -496,6 +629,16 @@ class CompletedRoundAnalysisResponse(BaseModel):
         description="Joint probability of achieving all these scores or better",
         ge=0.0,
         le=1.0
+    )
+
+    one_in_chance_overall_probability: Optional[int] = Field(
+        None,
+        description="Odds denominator for overall_probability",
+        ge=1
+    )
+    one_in_chance_overall_probability_text: Optional[str] = Field(
+        None,
+        description="Human-friendly odds string for overall_probability"
     )
     overall_performance_descriptor: str = Field(
         ...,
@@ -623,6 +766,23 @@ class SandbaggerAnalysisResponse(BaseModel):
         description="Joint probability of all tournament scores",
         ge=0.0,
         le=1.0
+    )
+
+    one_in_chance_all_tournament_scores: Optional[int] = Field(
+        None,
+        description=(
+            "Odds formatted as a denominator for the joint probability of all tournament scores. "
+            "Example: 2500 means roughly a 1 in 2,500 chance."
+        ),
+        ge=1
+    )
+
+    one_in_chance_all_tournament_scores_text: Optional[str] = Field(
+        None,
+        description=(
+            "Human-friendly odds string for the joint probability of all tournament scores. "
+            "Example: '1 in 2,500'."
+        )
     )
     
     # Summary and Recommendations
