@@ -1,9 +1,15 @@
-const CACHE_NAME = 'spackler-v1';
+const CACHE_NAME = 'spackler-v2';
 const urlsToCache = [
   '/',
   '/static/index.html',
-  '/static/images/gopher.svg',
-  '/static/manifest.json'
+  '/static/offline.html',
+  '/manifest.json',
+  '/static/manifest.json',
+  '/static/images/apple-touch-icon.png',
+  '/static/images/icon-192.png',
+  '/static/images/icon-512.png',
+  '/static/images/gopher.jpg',
+  '/static/images/spackler-logo.jpg'
 ];
 
 // Install service worker and cache assets
@@ -34,29 +40,43 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch strategy: Network first, fall back to cache
+// Fetch strategy: network-first for navigation, cache-first for assets
 self.addEventListener('fetch', event => {
-  // Skip non-GET requests
   if (event.request.method !== 'GET') return;
-  
+
+  const requestUrl = new URL(event.request.url);
+
   // Skip API calls - always go to network
-  if (event.request.url.includes('/api/')) {
+  if (requestUrl.pathname.startsWith('/api/')) {
     return;
   }
-  
+
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          return response;
+        })
+        .catch(() => caches.match(event.request)
+          .then(cached => cached || caches.match('/static/offline.html')))
+    );
+    return;
+  }
+
   event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        // Clone the response before caching
-        const responseClone = response.clone();
-        caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, responseClone);
-        });
-        return response;
-      })
-      .catch(() => {
-        // Network failed, try cache
-        return caches.match(event.request);
+    caches.match(event.request)
+      .then(cached => {
+        if (cached) return cached;
+
+        return fetch(event.request)
+          .then(response => {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+            return response;
+          })
+          .catch(() => caches.match('/static/offline.html'));
       })
   );
 });
