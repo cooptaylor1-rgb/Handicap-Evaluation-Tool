@@ -6987,20 +6987,26 @@
             const clearButton = document.getElementById('historyClear');
             const countBadge = document.getElementById('historyCount');
             
+            // Guard against missing elements (panels may be removed)
+            if (!itemsContainer) {
+                console.log('[Spackler] History panel elements not found, skipping update');
+                return;
+            }
+            
             // Update badge count
             if (countBadge) {
                 countBadge.textContent = history.length;
             }
             
             if (history.length === 0) {
-                emptyMessage.style.display = 'block';
+                if (emptyMessage) emptyMessage.style.display = 'block';
                 itemsContainer.innerHTML = '';
-                clearButton.style.display = 'none';
+                if (clearButton) clearButton.style.display = 'none';
                 return;
             }
             
-            emptyMessage.style.display = 'none';
-            clearButton.style.display = 'block';
+            if (emptyMessage) emptyMessage.style.display = 'none';
+            if (clearButton) clearButton.style.display = 'block';
             
             itemsContainer.innerHTML = history.map((item, index) => {
                 const scoreColor = item.score >= 75 ? 'var(--explosives-red)' : 
@@ -7848,6 +7854,12 @@
             const verdict = document.getElementById('quickVerdict');
             const score = document.getElementById('quickScore');
             const explanation = document.getElementById('quickExplanation');
+            
+            // Guard against null elements
+            if (!summary || !verdict || !score || !explanation) {
+                console.log('[Spackler] Quick summary elements not found, skipping');
+                return;
+            }
             
             const riskScore = data.sandbagging_risk_score;
             score.textContent = riskScore.toFixed(0) + '/100';
