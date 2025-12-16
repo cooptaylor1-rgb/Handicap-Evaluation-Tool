@@ -8780,14 +8780,21 @@
                     requestBody.casual_scores = casualScores;
                 }
 
+                console.log('[Spackler] Sending request:', JSON.stringify(requestBody, null, 2));
+                
                 const response = await fetch(`${API_BASE}/analyze/sandbagging`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(requestBody)
                 });
                 
-                if (!response.ok) throw new Error('Failed to analyze for sandbagging');
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('[Spackler] API Error:', response.status, errorText);
+                    throw new Error(`API Error ${response.status}: ${errorText.substring(0, 100)}`);
+                }
                 const data = await response.json();
+                console.log('[Spackler] Response received:', data.risk_level);
 
                 // 🆕 Update quick summary for first-time users
                 updateQuickSummary(data);
