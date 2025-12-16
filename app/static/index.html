@@ -3694,129 +3694,82 @@
         }
         
         /* ============================================
-           📱 MOBILE CADDY MODE - Touch-First Experience
+           📱 MOBILE-FIRST REDESIGN - iOS-Optimized
            ============================================ */
         
         @media (max-width: 600px) {
-            /* Reduce visual noise/perf costs on iPhone */
+            /* === PERFORMANCE: Disable expensive effects === */
             body::before {
-                display: none;
+                display: none !important;
             }
 
             body {
+                background: var(--bushwood-green);
                 background-attachment: scroll;
             }
 
-            /* Larger touch targets */
-            input, select, button {
-                min-height: 48px;
-                font-size: 16px; /* Prevents zoom on iOS */
-            }
-            
-            /* Full-width inputs */
-            .form-group input,
-            .form-group select {
-                width: 100%;
-                padding: 14px;
-            }
-            
-            /* Stack score entries vertically */
-            .score-entry {
-                flex-direction: column;
-                gap: 10px;
-            }
-            
-            .score-entry input {
-                width: 100%;
-            }
-            
-            /* Simpler suspicion gauge */
-            .suspicion-gauge {
-                width: 100%;
-                height: 30px;
-            }
-            
-            /* Achievement panel full-width */
-            .achievements-panel {
-                width: 100%;
-                right: -100%;
-                border-radius: 0;
-            }
-            
-            .achievements-toggle {
-                display: none; /* Hide on mobile to reduce clutter */
-            }
-            
-            /* Sound toggle repositioning */
-            .sound-toggle {
-                display: none; /* Hide on mobile */
+            /* === TYPOGRAPHY SCALE === */
+            :root {
+                --mobile-text-xs: 0.75rem;   /* 12px - captions */
+                --mobile-text-sm: 0.8125rem; /* 13px - secondary */
+                --mobile-text-base: 0.9375rem; /* 15px - body */
+                --mobile-text-lg: 1.0625rem; /* 17px - emphasis */
+                --mobile-text-xl: 1.25rem;   /* 20px - headings */
+                --mobile-text-2xl: 1.5rem;   /* 24px - titles */
             }
 
-            .quiet-mode-banner {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
+            /* === TOUCH TARGETS (iOS HIG: 44pt minimum) === */
+            input, select, button, .tab, a {
+                min-height: 44px;
+                font-size: 16px; /* Prevents iOS zoom on focus */
+            }
+
+            /* === COMPACT HEADER === */
+            header {
+                padding: 8px 12px;
+                padding-top: calc(8px + env(safe-area-inset-top));
+                text-align: center;
+                background: var(--corkboard-bg);
             }
             
-            /* HIDE the toggle buttons on mobile - too cluttered */
-            .watchlist-toggle,
-            .history-toggle,
-            .stats-toggle {
+            header::after {
+                display: none; /* Remove pushpin */
+            }
+
+            header h1 {
+                font-size: var(--mobile-text-xl);
+                margin-bottom: 2px;
+                line-height: 1.2;
+            }
+            
+            header h1::before,
+            header h1::after {
                 display: none;
             }
-            
-            /* Make panels full-width on mobile */
-            .watchlist-panel,
-            .history-panel {
-                width: 100%;
-                right: -100%;
-                border-radius: 0;
-                top: 0;
-                height: 100%;
+
+            header p {
+                font-size: var(--mobile-text-xs);
+                margin-bottom: 0;
+                line-height: 1.3;
             }
             
-            .stats-panel {
-                display: none; /* Hide stats panel on mobile */
-            }
-            
-            /* Simplified header */
-            header {
-                padding: 12px 15px;
-                text-align: center;
+            .header-tagline {
+                display: none !important;
             }
             
             .header-content {
                 width: 100%;
             }
-            
-            header h1 {
-                font-size: 1.3rem;
-                margin-bottom: 4px;
-            }
-            
-            header p {
-                font-size: 0.85rem;
-                margin-bottom: 0;
-            }
 
-            .header-tagline {
-                display: none;
-            }
-
-            .mobile-cta {
-                margin: 12px 0;
-            }
-
-            .mobile-cta-actions {
-                flex-direction: column;
-            }
-            
-            /* Mode toggle - inline with header */
+            /* === MODE TOGGLE: Icon-only === */
             .mode-toggle {
-                position: static;
-                margin: 10px auto 0;
-                padding: 8px 12px;
-                font-size: 0.8rem;
+                position: absolute;
+                top: calc(8px + env(safe-area-inset-top));
+                right: 8px;
+                padding: 6px 8px;
+                margin: 0;
+                min-height: 32px;
+                border-radius: 16px;
             }
             
             .mode-toggle .mode-text {
@@ -3824,19 +3777,63 @@
             }
             
             .mode-toggle .gopher-icon {
-                width: 1.5em;
-                height: 1.5em;
+                width: 20px;
+                height: 20px;
+            }
+
+            /* === HIDE ALL CLUTTER === */
+            .achievements-toggle,
+            .sound-toggle,
+            .watchlist-toggle,
+            .history-toggle,
+            .stats-toggle,
+            .stats-panel {
+                display: none !important;
             }
             
-            /* Better tabs for mobile - horizontal scroll */
+            .quiet-mode-banner {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .mobile-cta {
+                margin: 10px 0;
+            }
+            
+            .mobile-cta-actions {
+                flex-direction: column;
+            }
+
+            /* === CARL'S TIP: Minimal or hidden === */
+            .carl-tip {
+                padding: 8px 12px;
+                font-size: var(--mobile-text-sm);
+                margin: 8px 0;
+                border-radius: var(--radius-sm);
+            }
+            
+            .carl-tip .tip-icon {
+                display: none;
+            }
+            
+            .carl-tip .tip-refresh {
+                padding: 4px;
+                min-height: 28px;
+            }
+
+            /* === iOS-STYLE SEGMENTED TABS === */
             .tabs {
                 display: flex;
+                gap: 0;
+                padding: 4px;
+                margin: 8px 4px;
+                background: rgba(0,0,0,0.15);
+                border-radius: 10px;
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
-                gap: 4px;
-                padding: 6px;
-                margin-top: 10px;
                 scrollbar-width: none;
+                scroll-snap-type: x mandatory;
             }
             
             .tabs::-webkit-scrollbar {
@@ -3845,280 +3842,479 @@
             
             .tab {
                 flex: 0 0 auto;
-                padding: 10px 14px;
-                font-size: 0.8rem;
-                min-width: auto;
+                padding: 8px 12px;
+                font-size: var(--mobile-text-xs);
+                font-family: var(--font-body);
+                font-weight: 600;
+                background: transparent;
+                color: rgba(255,255,255,0.7);
+                border: none;
+                border-radius: 8px;
+                margin: 0;
+                box-shadow: none;
                 white-space: nowrap;
+                scroll-snap-align: start;
+                transition: all 0.2s ease;
             }
             
-            /* Hide emoji decorations on small screens */
             .tab::before {
+                display: none !important;
+            }
+            
+            .tab:hover {
+                transform: none;
+                margin-top: 0;
+                background: transparent;
+            }
+            
+            .tab.active {
+                background: var(--paper-cream);
+                color: var(--bushwood-dark);
+                box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+                padding-bottom: 8px;
+            }
+            
+            .tab[onclick*="sandbagging"] {
+                background: transparent;
+                border-left: none;
+            }
+            
+            .tab[onclick*="sandbagging"].active {
+                background: var(--explosives-red);
+                color: white;
+            }
+
+            /* === MAIN CONTAINER === */
+            .container {
+                padding: 0;
+                padding-bottom: calc(16px + env(safe-area-inset-bottom));
+            }
+
+            /* === TAB CONTENT CARDS === */
+            .tab-content {
+                margin: 0 8px;
+                padding: 16px;
+                border-radius: var(--radius-md);
+                border: none;
+            }
+            
+            .tab-content::before {
+                display: none; /* Remove coffee stain */
+            }
+
+            /* === FORM SECTIONS: iOS Card Style === */
+            .form-section {
+                background: white;
+                padding: 12px;
+                margin: 0 0 12px 0;
+                border-radius: var(--radius-md);
+                box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+            }
+            
+            .form-section h3 {
+                font-size: var(--mobile-text-base);
+                font-family: var(--font-body);
+                font-weight: 600;
+                margin-bottom: 12px;
+                color: var(--text-secondary);
+            }
+
+            /* === FORM GRID: Single column === */
+            .form-grid {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .form-group {
+                margin: 0;
+            }
+            
+            .form-group label {
+                font-size: var(--mobile-text-sm);
+                font-weight: 500;
+                margin-bottom: 6px;
+                color: var(--text-secondary);
+            }
+            
+            .form-group input,
+            .form-group select {
+                width: 100%;
+                padding: 12px;
+                font-size: 16px;
+                border-radius: var(--radius-md);
+                border: 1px solid #e0e0e0;
+                background: #fafafa;
+            }
+            
+            .form-group input:focus,
+            .form-group select:focus {
+                border-color: var(--bushwood-green);
+                background: white;
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(44, 71, 47, 0.1);
+            }
+
+            /* === SCORE ENTRIES === */
+            .score-entry {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .score-entry input {
+                width: 100%;
+            }
+
+            /* === BUTTONS: Full width, iOS style === */
+            .btn-primary,
+            button[type="submit"] {
+                width: 100%;
+                padding: 14px 20px;
+                font-size: var(--mobile-text-base);
+                font-weight: 600;
+                border-radius: var(--radius-md);
+                margin-top: 8px;
+            }
+
+            /* === RESULT CARDS === */
+            .result-card {
+                padding: 14px;
+                margin-bottom: 12px;
+                border-radius: var(--radius-md);
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+            
+            .result-card::before {
                 display: none;
             }
             
-            /* Simplified result cards */
+            .result-card:hover {
+                transform: none;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+
+            .result-header {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            
+            .result-header h4 {
+                font-size: var(--mobile-text-base);
+                flex: 1;
+            }
+
+            .probability-badge {
+                font-size: var(--mobile-text-sm);
+                padding: 6px 10px;
+                border-radius: 6px;
+            }
+
+            /* === DETAIL ITEMS: Key-value rows === */
+            .detail-grid,
+            .result-details {
+                display: flex;
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .detail-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 0;
+                border-bottom: 1px solid #f0f0f0;
+            }
+            
+            .detail-item:last-child {
+                border-bottom: none;
+            }
+
+            .detail-item .label {
+                font-size: var(--mobile-text-sm);
+                color: var(--text-secondary);
+                margin: 0;
+            }
+
+            .detail-item .value {
+                font-size: var(--mobile-text-base);
+                font-weight: 600;
+                text-align: right;
+                max-width: 60%;
+            }
+
+            /* === RISK CARD === */
             .risk-card {
                 flex-direction: column;
                 text-align: center;
+                padding: 16px;
             }
             
             .risk-score-circle {
-                margin: 0 auto 15px;
+                margin: 0 auto 12px;
+                width: 80px;
+                height: 80px;
             }
-            
-            /* Compact flags display */
+
+            /* === RED FLAGS === */
             .red-flags-section {
-                padding: 10px;
+                padding: 12px;
             }
             
             .red-flag-item {
                 padding: 10px;
+                margin-bottom: 8px;
+                font-size: var(--mobile-text-sm);
+            }
+
+            /* === SUSPICION GAUGE === */
+            .suspicion-gauge {
+                width: 100%;
+                height: 24px;
+                border-radius: 12px;
+            }
+
+            /* === MILESTONES TABLE === */
+            .milestones-table th,
+            .milestones-table td {
+                padding: 8px 6px;
+                font-size: var(--mobile-text-xs);
+            }
+
+            /* === VERDICT/ACTIONS === */
+            .verdict-actions {
+                flex-direction: column;
+                gap: 8px;
             }
             
-            /* Splash screen mobile */
+            .verdict-actions button {
+                width: 100%;
+            }
+
+            /* === NARRATION BOX === */
+            .narration-box {
+                padding: 12px;
+                font-size: var(--mobile-text-sm);
+                line-height: 1.5;
+            }
+            
+            .narration-box::before {
+                font-size: 1.2rem;
+            }
+
+            /* === SPLASH SCREEN === */
+            .splash-screen {
+                padding: 20px;
+                padding-top: calc(40px + env(safe-area-inset-top));
+                padding-bottom: calc(40px + env(safe-area-inset-bottom));
+            }
+            
             .splash-silhouette {
-                width: 220px;
-                max-width: 70vw;
+                width: 200px;
+                max-width: 60vw;
+                margin-bottom: 16px;
             }
             
             .splash-logo {
-                font-size: 1.2rem;
-                padding: 0 20px;
+                font-size: 1.5rem;
+                margin-bottom: 8px;
             }
             
             .splash-tagline {
-                font-size: 0.85rem;
-                padding: 0 20px;
+                font-size: var(--mobile-text-sm);
+                margin-bottom: 24px;
+                padding: 0 16px;
             }
             
             .splash-buttons {
-                flex-direction: column;
-                gap: 10px;
                 width: 100%;
-                padding: 0 20px;
+                padding: 0 16px;
+                gap: 12px;
             }
             
             .splash-buttons button {
                 width: 100%;
             }
             
-            /* WANTED poster mobile */
-            .wanted-poster {
-                padding: 15px;
+            .btn-dynamite {
+                font-size: 1.1rem;
+                padding: 14px 24px;
             }
             
-            .wanted-poster::before {
-                font-size: 1rem;
+            .btn-clipboard {
+                font-size: var(--mobile-text-sm);
+                padding: 10px 20px;
             }
-            
-            /* Footer compact */
-            footer {
-                padding: 20px 10px;
-            }
-            
-            .footer-quote {
-                font-size: 0.85rem;
-            }
-            
-            /* Carl's tip banner */
-            .carl-tip {
-                padding: 10px 12px;
-                font-size: 0.85rem;
-                margin-bottom: 10px;
-            }
-            
-            .carl-tip .tip-icon {
-                display: none;
-            }
-            
-            /* Quick check banner mobile */
+
+            /* === QUICK CHECK BANNER === */
             .quick-check-banner {
-                padding: 15px;
-                margin: 10px 0;
+                padding: 12px;
+                margin: 8px 0;
+                border-radius: var(--radius-md);
             }
             
             .quick-check-banner h3 {
-                font-size: 1.1rem;
+                font-size: var(--mobile-text-base);
+                margin-bottom: 4px;
             }
             
             .quick-check-banner p {
-                font-size: 0.85rem;
+                font-size: var(--mobile-text-sm);
             }
-            
-            /* Container padding */
-            .container {
-                padding: calc(8px + env(safe-area-inset-top)) calc(8px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(8px + env(safe-area-inset-left));
-            }
-            
-            /* Form sections */
-            .form-section {
+
+            /* === WANTED POSTER === */
+            .wanted-poster {
                 padding: 12px;
-                margin-bottom: 12px;
-            }
-
-            /* Make result cards easier to read on small screens */
-            .result-card {
-                box-shadow: var(--shadow-sm);
-                padding: 14px;
-            }
-
-            .result-card::before {
-                display: none;
-            }
-
-            .result-card:hover {
-                transform: none;
-                box-shadow: var(--shadow-sm);
-            }
-
-            .result-header {
-                flex-wrap: wrap;
-                gap: 10px;
-                align-items: flex-start;
-            }
-
-            .probability-badge {
-                font-size: 1rem;
-                padding: 8px 12px;
-            }
-
-            .detail-grid,
-            .result-details {
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
-
-            .detail-item {
-                text-align: left;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                gap: 12px;
-                padding: 10px 12px;
-            }
-
-            .detail-item .label {
-                margin-bottom: 0;
-                font-size: 0.85rem;
-                flex: 1 1 auto;
-            }
-
-            .detail-item .value {
-                font-size: 1.05rem;
-                flex: 0 0 auto;
-                text-align: right;
-                max-width: 55%;
-                word-break: break-word;
-            }
-
-            /* Milestone table: keep it readable with long "(1 in N)" strings */
-            .milestones-table th,
-            .milestones-table td {
-                padding: 10px 8px;
-                font-size: 0.85rem;
-            }
-
-            .milestones-table td {
-                word-break: break-word;
             }
             
-            .form-section h3 {
-                font-size: 1rem;
-                margin-bottom: 12px;
+            .wanted-poster::before {
+                font-size: 0.9rem;
+            }
+
+            /* === FULL-WIDTH SLIDE PANELS === */
+            .watchlist-panel,
+            .history-panel,
+            .achievements-panel {
+                width: 100%;
+                right: -100%;
+                border-radius: 0;
+                top: 0;
+                height: 100%;
+            }
+
+            /* === FOOTER === */
+            footer {
+                padding: 16px 12px;
+                padding-bottom: calc(16px + env(safe-area-inset-bottom));
             }
             
-            /* Hide grass texture on mobile for performance */
+            .footer-quote {
+                font-size: var(--mobile-text-xs);
+            }
+
+            /* === LOADING STATES === */
+            .loading {
+                padding: 24px;
+            }
+            
+            .loading p {
+                font-size: var(--mobile-text-sm);
+            }
+            
+            /* === HIDE GRASS OVERLAY === */
             .grass-overlay {
                 display: none;
             }
-            
-            /* Larger form labels */
-            .form-group label {
-                font-size: 0.95rem;
-                margin-bottom: 8px;
+
+            /* === WELCOME MODAL === */
+            .welcome-content {
+                padding: 20px;
+                margin: 16px;
+                max-height: calc(100vh - 32px);
             }
             
-            /* Action buttons stack */
-            .verdict-actions {
+            .welcome-title {
+                font-size: var(--mobile-text-2xl);
+            }
+            
+            .welcome-subtitle {
+                font-size: var(--mobile-text-sm);
+            }
+            
+            .welcome-step {
+                padding: 10px;
+            }
+            
+            .welcome-step-text {
+                font-size: var(--mobile-text-sm);
+            }
+            
+            .welcome-buttons {
                 flex-direction: column;
-                gap: 10px;
             }
             
-            .verdict-actions button {
-                width: 100%;
-            }
-            
-            /* Narration box mobile */
-            .narration-box {
-                padding: 15px;
-                font-size: 0.9rem;
-            }
-            
-            .narration-box::before {
-                font-size: 1.5rem;
+            .welcome-btn {
+                padding: 12px 16px;
             }
         }
         
-        /* Extra small phones (iPhone SE, etc.) */
+        /* === EXTRA SMALL PHONES (iPhone SE, etc.) === */
         @media (max-width: 380px) {
             header h1 {
                 font-size: 1.1rem;
             }
             
             header p {
-                font-size: 0.8rem;
+                font-size: 0.7rem;
             }
             
             .tab {
-                padding: 8px 10px;
-                font-size: 0.75rem;
+                padding: 6px 10px;
+                font-size: 0.7rem;
             }
             
             .splash-silhouette {
-                width: 180px;
+                width: 160px;
             }
             
             .splash-logo {
-                font-size: 1rem;
+                font-size: 1.25rem;
             }
             
             .form-section h3 {
-                font-size: 0.95rem;
+                font-size: 0.9rem;
             }
             
-            .mode-toggle {
-                padding: 5px 8px;
-            }
-            
-            .quick-check-banner h3 {
+            .btn-dynamite {
                 font-size: 1rem;
+                padding: 12px 20px;
+            }
+            
+            .result-card {
+                padding: 10px;
+            }
+            
+            .detail-item {
+                padding: 8px 0;
             }
         }
         
-        /* iPhone notch/safe area support */
+        /* === SAFE AREA SUPPORT === */
         @supports (padding-top: env(safe-area-inset-top)) {
-            header {
-                padding-top: calc(12px + env(safe-area-inset-top));
-            }
-            
-            .splash-screen {
-                padding-top: env(safe-area-inset-top);
-                padding-bottom: env(safe-area-inset-bottom);
-            }
-            
-            footer {
-                padding-bottom: calc(20px + env(safe-area-inset-bottom));
+            @media (max-width: 600px) {
+                header {
+                    padding-top: calc(8px + env(safe-area-inset-top));
+                }
+                
+                .splash-screen {
+                    padding-top: calc(40px + env(safe-area-inset-top));
+                    padding-bottom: calc(40px + env(safe-area-inset-bottom));
+                }
+                
+                footer {
+                    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+                }
+                
+                .container {
+                    padding-left: env(safe-area-inset-left);
+                    padding-right: env(safe-area-inset-right);
+                }
             }
         }
         
-        /* Landscape mobile */
+        /* === LANDSCAPE MOBILE === */
         @media (max-width: 900px) and (orientation: landscape) {
             header {
-                padding: 10px 15px;
+                padding: 6px 12px;
+                padding-left: calc(12px + env(safe-area-inset-left));
+                padding-right: calc(12px + env(safe-area-inset-right));
             }
             
             header h1 {
-                font-size: 1.1rem;
+                font-size: 1rem;
+            }
+            
+            header p {
+                display: none;
             }
             
             .splash-screen {
@@ -4126,36 +4322,54 @@
                 flex-wrap: wrap;
                 justify-content: center;
                 padding: 10px;
+                gap: 16px;
+            }
+            
+            .splash-silhouette {
+                width: 120px;
+                margin: 0;
             }
             
             .splash-logo,
             .splash-tagline {
-                width: 100%;
-                text-align: center;
+                width: auto;
             }
             
-            .gopher-popup {
-                bottom: 10px;
+            .splash-buttons {
+                flex-direction: row;
+                width: auto;
             }
             
-            .gopher-speech {
-                bottom: 70px;
+            .container {
+                padding-left: calc(8px + env(safe-area-inset-left));
+                padding-right: calc(8px + env(safe-area-inset-right));
             }
         }
         
-        /* Touch-friendly enhancements */
+        /* === TOUCH DEVICE ENHANCEMENTS === */
         @media (pointer: coarse) {
-            /* Larger tap targets for touch devices */
             button, .tab, a {
                 min-height: 44px;
             }
             
-            /* Remove hover effects that don't work on touch */
+            /* Remove hover effects on touch */
             .tab:hover::after {
                 display: none;
             }
             
-            /* Better scroll indicators */
+            .result-card:hover {
+                transform: none;
+            }
+            
+            /* Momentum scrolling */
+            .tabs,
+            .achievements-panel,
+            .watchlist-panel,
+            .history-panel {
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* Hide scrollbars */
             .tabs {
                 scrollbar-width: none;
                 -ms-overflow-style: none;
@@ -4165,10 +4379,11 @@
                 display: none;
             }
             
-            /* Add momentum scrolling */
-            .tabs,
-            .achievements-panel {
-                -webkit-overflow-scrolling: touch;
+            /* Active states for touch feedback */
+            button:active,
+            .tab:active {
+                opacity: 0.7;
+                transform: scale(0.98);
             }
         }
         
