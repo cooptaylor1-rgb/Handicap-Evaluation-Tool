@@ -8803,21 +8803,27 @@
                 updateGauge(data.sandbagging_risk_score);
 
                 // Update risk card
-                document.getElementById('sand-golfer-name').textContent = 
-                    `${data.golfer_name} (${data.handicap_index} HCP)`;
+                const sandGolferName = document.getElementById('sand-golfer-name');
+                if (sandGolferName) {
+                    sandGolferName.textContent = `${data.golfer_name} (${data.handicap_index} HCP)`;
+                }
                 
                 const riskBadge = document.getElementById('risk-badge');
                 const riskCard = document.getElementById('risk-card');
                 
                 // Get mode-aware badge class and color
                 const badgeClass = getRiskBadgeClass(data.risk_level);
-                riskBadge.className = 'risk-badge ' + badgeClass;
-                riskBadge.textContent = `${data.risk_level}`;
+                if (riskBadge) {
+                    riskBadge.className = 'risk-badge ' + badgeClass;
+                    riskBadge.textContent = `${data.risk_level}`;
+                }
                 
                 // Apply card styling based on risk level
                 const riskColor = getRiskColor(data.sandbagging_risk_score);
-                riskCard.style.borderLeftColor = riskColor;
-                riskCard.style.borderLeftWidth = '4px';
+                if (riskCard) {
+                    riskCard.style.borderLeftColor = riskColor;
+                    riskCard.style.borderLeftWidth = '4px';
+                }
                 
                 // Update tier label display if the API returns a tier_label
                 const tierLabelEl = document.getElementById('tier-label-display');
@@ -8825,26 +8831,38 @@
                     tierLabelEl.textContent = data.tier_label;
                 }
                 
-                document.getElementById('risk-score-display').textContent = data.sandbagging_risk_score.toFixed(1);
-                document.getElementById('risk-score-display').style.color = riskColor;
+                const riskScoreDisplay = document.getElementById('risk-score-display');
+                if (riskScoreDisplay) {
+                    riskScoreDisplay.textContent = data.sandbagging_risk_score.toFixed(1);
+                    riskScoreDisplay.style.color = riskColor;
+                }
                 
-                document.getElementById('sand-summary').innerHTML = data.summary;
-                document.getElementById('sand-recommendation').textContent = data.recommendation;
+                const sandSummary = document.getElementById('sand-summary');
+                if (sandSummary) sandSummary.innerHTML = data.summary;
+                
+                const sandRecommendation = document.getElementById('sand-recommendation');
+                if (sandRecommendation) sandRecommendation.textContent = data.recommendation;
 
                 // Update statistics
-                document.getElementById('sand-avg-score').textContent = data.tournament_avg_score.toFixed(1);
+                const sandAvgScore = document.getElementById('sand-avg-score');
+                if (sandAvgScore) sandAvgScore.textContent = data.tournament_avg_score.toFixed(1);
                 
                 const avgVsExpected = data.tournament_avg_vs_expected;
                 const avgVsExpectedEl = document.getElementById('sand-avg-vs-expected');
-                avgVsExpectedEl.textContent = (avgVsExpected > 0 ? '+' : '') + avgVsExpected.toFixed(1);
-                avgVsExpectedEl.style.color = avgVsExpected < 0 ? 'var(--success)' : 'var(--error)';
-                avgVsExpectedEl.style.fontWeight = 'bold';
+                if (avgVsExpectedEl) {
+                    avgVsExpectedEl.textContent = (avgVsExpected > 0 ? '+' : '') + avgVsExpected.toFixed(1);
+                    avgVsExpectedEl.style.color = avgVsExpected < 0 ? 'var(--success)' : 'var(--error)';
+                    avgVsExpectedEl.style.fontWeight = 'bold';
+                }
                 
-                document.getElementById('sand-percentile').textContent = data.tournament_performance_percentile.toFixed(1) + '%';
-                document.getElementById('sand-volatility').textContent = 
-                    `${data.score_volatility.toFixed(1)} (${data.volatility_vs_expected})`;
-                document.getElementById('sand-joint-prob').textContent = 
-                    (data.probability_all_tournament_scores * 100).toFixed(4) + '%';
+                const sandPercentile = document.getElementById('sand-percentile');
+                if (sandPercentile) sandPercentile.textContent = data.tournament_performance_percentile.toFixed(1) + '%';
+                
+                const sandVolatility = document.getElementById('sand-volatility');
+                if (sandVolatility) sandVolatility.textContent = `${data.score_volatility.toFixed(1)} (${data.volatility_vs_expected})`;
+                
+                const sandJointProb = document.getElementById('sand-joint-prob');
+                if (sandJointProb) sandJointProb.textContent = (data.probability_all_tournament_scores * 100).toFixed(4) + '%';
 
                 const oddsEl = document.getElementById('sand-joint-odds');
                 if (oddsEl) {
@@ -8863,43 +8881,51 @@
                 }
                 
                 // Casual comparison (if available)
-                if (data.has_casual_comparison) {
-                    document.getElementById('casual-comparison').style.display = 'block';
-                    document.getElementById('sand-casual-diff').textContent = 
-                        (data.casual_vs_tournament_diff > 0 ? '+' : '') + data.casual_vs_tournament_diff.toFixed(1) + ' strokes';
-                } else {
-                    document.getElementById('casual-comparison').style.display = 'none';
+                const casualComparison = document.getElementById('casual-comparison');
+                const sandCasualDiff = document.getElementById('sand-casual-diff');
+                if (casualComparison) {
+                    if (data.has_casual_comparison) {
+                        casualComparison.style.display = 'block';
+                        if (sandCasualDiff) {
+                            sandCasualDiff.textContent = 
+                                (data.casual_vs_tournament_diff > 0 ? '+' : '') + data.casual_vs_tournament_diff.toFixed(1) + ' strokes';
+                        }
+                    } else {
+                        casualComparison.style.display = 'none';
+                    }
                 }
 
                 // Display red flags with themed styling
                 const flagsContainer = document.getElementById('red-flags-container');
-                document.getElementById('red-flags-count').textContent = data.red_flags.length;
+                const redFlagsCount = document.getElementById('red-flags-count');
+                if (redFlagsCount) redFlagsCount.textContent = data.red_flags.length;
                 
-                if (data.red_flags.length === 0) {
-                    flagsContainer.innerHTML = '<p class="no-flags">✅ No red flags detected - looking clean!</p>';
-                } else {
-                    flagsContainer.innerHTML = '';
-                    data.red_flags.forEach(flag => {
-                        const flagEl = document.createElement('div');
-                        flagEl.className = `red-flag-item severity-${flag.severity.toLowerCase()}`;
-                        
-                        // Get severity icon
-                        const severityIcons = {
-                            'LOW': '💬',
-                            'MEDIUM': '⚡',
-                            'HIGH': '🚨',
-                            'CRITICAL': '🔥'
-                        };
-                        const icon = severityIcons[flag.severity] || '🚩';
-                        
-                        flagEl.innerHTML = `
-                            <div class="flag-header">
-                                <span class="flag-severity">
-                                    ${icon} ${flag.severity}
-                                </span>
-                                <span class="flag-type">
-                                    ${flag.flag_type.replace(/_/g, ' ')}
-                                </span>
+                if (flagsContainer) {
+                    if (data.red_flags.length === 0) {
+                        flagsContainer.innerHTML = '<p class="no-flags">✅ No red flags detected - looking clean!</p>';
+                    } else {
+                        flagsContainer.innerHTML = '';
+                        data.red_flags.forEach(flag => {
+                            const flagEl = document.createElement('div');
+                            flagEl.className = `red-flag-item severity-${flag.severity.toLowerCase()}`;
+                            
+                            // Get severity icon
+                            const severityIcons = {
+                                'LOW': '💬',
+                                'MEDIUM': '⚡',
+                                'HIGH': '🚨',
+                                'CRITICAL': '🔥'
+                            };
+                            const icon = severityIcons[flag.severity] || '🚩';
+                            
+                            flagEl.innerHTML = `
+                                <div class="flag-header">
+                                    <span class="flag-severity">
+                                        ${icon} ${flag.severity}
+                                    </span>
+                                    <span class="flag-type">
+                                        ${flag.flag_type.replace(/_/g, ' ')}
+                                    </span>
                             </div>
                             <div class="flag-description">${flag.description}</div>
                             <div class="flag-evidence">
@@ -8910,8 +8936,9 @@
                             </div>` : ''}
                         `;
                         
-                        flagsContainer.appendChild(flagEl);
-                    });
+                            flagsContainer.appendChild(flagEl);
+                        });
+                    }
                 }
 
                 // 🎭 Verdict Theatrics - Carl's commentary based on risk level
